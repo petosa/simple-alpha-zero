@@ -4,8 +4,8 @@ from game import Game
 
 class TicTacToe(Game):
 
-    def __init__(self):
-        self.initial_state = np.zeros((3, 3, 2 + 1)) # Final plane is a turn indicator
+    def get_initial_state(self):
+        return np.zeros((3, 3, 2 + 1), dtype=np.float32) # Final plane is a turn indicator
 
     def get_available_actions(self, s):
         return s[:, :, :2].sum(axis=-1) == 0
@@ -13,7 +13,8 @@ class TicTacToe(Game):
     # Step from state s with action a
     def take_action(self, s, a):
         p = int(s[0,0,2])
-        s[:,:,p] += a # Next move
+        s = s.copy()
+        s[:,:,p] += a.astype(np.float32) # Next move
         s[:,:,2] = (s[:,:,2] + 1) % 2 # Toggle player
         return s
 
@@ -27,6 +28,9 @@ class TicTacToe(Game):
                 return p
         if self.get_available_actions(s).sum() == 0: # Full board, draw
             return -1
+
+    def get_player(self, s):
+        return int(s[0,0,2])
 
     # Print a human-friendly visualization of the board.
     def friendly_print(self, s):
@@ -42,14 +46,14 @@ if __name__ == "__main__":
 
     def play(hvh=False):         
         t = TicTacToe()
-        state = t.initial_state
+        state = t.get_initial_state()
         t.friendly_print(state)
 
         turn = 0
         winner = None
         while winner is None:
 
-            p = int(state[0,0,2])
+            p = t.get_player(state)
             print("Turn {} (Player {})".format(turn, p))
 
             if hvh:
