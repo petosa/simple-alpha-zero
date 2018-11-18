@@ -1,46 +1,18 @@
 import unittest
 import numpy as np
-from game import Game
+from games.guessit import OnePlayerGuessIt, TwoPlayerGuessIt
+from games.leapfrog import ThreePlayerLeapFrog
 from mcts import MCTS
 from neural_network import NeuralNetwork
-
-# I have invented a game called "guess-it", which is extremely simple.
-# You have a NxN grid and must place a piece in the bottom right corner to win.
-# I can work out the game trees for this simple game by hand.
-
-class OnePlayerGuessIt(Game):
-    def __init__(self): self.n = 2
-    def get_initial_state(self): return np.zeros((self.n, self.n), dtype=np.float32)
-    def get_available_actions(self, s): return s == 0
-    def check_winner(self, s): return None if s[1,1] == 0 else 0
-    def take_action(self, s, a): return s + a.astype(np.float32)
-    def get_player(self, s): return 0
-
-class TwoPlayerGuessIt(Game):
-    def __init__(self): self.n = 2
-    def get_initial_state(self): return np.zeros((self.n, self.n, 3), dtype=np.float32)
-    def get_available_actions(self, s): return s[:, :, :2].sum(axis=-1) == 0
-    def check_winner(self, s):
-        if s[1,1,0] == 1:
-            return 0
-        if s[1,1,1] == 1:
-            return 1
-    def take_action(self, s, a):
-        p = int(s[0,0,2])
-        s = s.copy()
-        s[:,:,p] += a.astype(np.float32) # Next move
-        s[:,:,2] = (s[:,:,2] + 1) % 2 # Toggle player
-        return s
-    def get_player(self, s): return int(s[0,0,2])
 
 
 # Always predicts a value of 0.5 for a node and a uniform distribution over actions.
 class DumbNet(NeuralNetwork):
     def __init__(self, game): self.game = game
     def predict(self, s): return np.ones_like(self.game.get_available_actions(self.game.get_initial_state())), 0.5
-        
 
-class GuessItTest(unittest.TestCase):
+
+class MCTSTest(unittest.TestCase):
 
     # Check that statistics of out-edges from expanded node are correct.
     def assertExpanded(self, state, mcts):
@@ -59,6 +31,8 @@ class GuessItTest(unittest.TestCase):
             for stat in mcts.tree[mcts.np_hash(state)].values():
                 n_total += stat[1]
             self.assertEqual(statistics[1] + statistics[2]*(n_total**.5/(1+statistics[0])), heuristic)
+
+class GuessItTest(MCTSTest):
 
     def time(self):
         import time
@@ -225,7 +199,113 @@ class GuessItTest(unittest.TestCase):
         self.assertEdge(s_prev, np.array([1,0]), m, [1, -0.5, 1/3], 0.10092521257733145)
         self.assertEdge(s_prev, np.array([1,1]), m, [11, 1.0, 1/3], 1.1001542020962218)
 
+
+
+class LeapFrogTest(MCTSTest):
+
+    def test_three_player_leap_frog(self):
+        lf = ThreePlayerLeapFrog()
+        d = DumbNet(lf)
+        m = MCTS(lf, d)
+        self.assertEqual(m.tree, {})
+        init = lf.get_initial_state()
+
+        # First simulation
+        m.simulate(init) # Adds root and outward edges
+        self.assertIn(m.np_hash(init), m.tree) # Root added to tree
+        self.assertEqual(len(m.tree), 1)
+        self.assertExpanded(init, m)
+
+        # Second simulation
+        m.simulate(init)
+        s = lf.take_action(init, np.array([0,1,0,0,0,0,0,0,0,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 2)
+        self.assertExpanded(s, m)
+        self.assertEdge(init, np.array([1]), m, [1,-.5,1/3], heuristic=-0.33333333333333337)
+        self.assertEdge(init, np.array([2]), m, [0,0,1/3], heuristic=1/3)
+
+        # Third simulation
+        m.simulate(init)
+        s = lf.take_action(init, np.array([0,0,1,0,0,0,0,0,0,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 3)
+        self.assertExpanded(s, m)
+        self.assertEdge(init, np.array([1]), m, [1,-.5,1/3], heuristic=-0.26429773960448416)
+        self.assertEdge(init, np.array([2]), m, [1,-.5,1/3], heuristic=-0.26429773960448416)
+        self.assertEdge(init, np.array([3]), m, [0,0,1/3], heuristic=0.4714045207910317)
+
+        # Fourth simulation
+        m.simulate(init)
+        s = lf.take_action(init, np.array([0,0,0,1,0,0,0,0,0,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 4)
+        self.assertExpanded(s, m)
+        self.assertEdge(init, np.array([1]), m, [1,-.5,1/3], heuristic=-0.21132486540518713)
+        self.assertEdge(init, np.array([2]), m, [1,-.5,1/3], heuristic=-0.21132486540518713)
+        self.assertEdge(init, np.array([3]), m, [1,-.5,1/3], heuristic=-0.21132486540518713)
+
+        # Fifth simulation
+        m.simulate(init)
+        s_prev = lf.take_action(init, np.array([0,1,0,0,0,0,0,0,0,0]))
+        s = lf.take_action(s_prev, np.array([0,0,1,0,0,0,0,0,0,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 5)
+        self.assertExpanded(s, m)
+        self.assertEdge(s_prev, np.array([2]), m, [1,-.5,1/3], heuristic=-0.33333333333333337)
+        self.assertEdge(init, np.array([1]), m, [2,-.5,1/3], heuristic=-0.2777777777777778)
+
+        # Sixth simulation
+        m.simulate(init)
+        s_prev = lf.take_action(init, np.array([0,0,1,0,0,0,0,0,0,0]))
+        s = lf.take_action(s_prev, np.array([0,0,0,1,0,0,0,0,0,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 6)
+        self.assertExpanded(s, m)
+        self.assertEdge(s_prev, np.array([3]), m, [1,-.5,1/3], heuristic=-0.33333333333333337)
+        self.assertEdge(init, np.array([1]), m, [2,-.5,1/3], heuristic=-0.2515480025000234)
+        self.assertEdge(init, np.array([2]), m, [2,-.5,1/3], heuristic=-0.2515480025000234)
+
+        # Seventh simulation
+        m.simulate(init)
+        s_prev = lf.take_action(init, np.array([0,0,0,1,0,0,0,0,0,0]))
+        s = lf.take_action(s_prev, np.array([0,0,0,0,1,0,0,0,0,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 7)
+        self.assertExpanded(s, m)
+        self.assertEdge(s_prev, np.array([4]), m, [1,-.5,1/3], heuristic=-0.33333333333333337)
+        self.assertEdge(init, np.array([1]), m, [2,-.5,1/3], heuristic=-0.22783447302409138)
+        self.assertEdge(init, np.array([2]), m, [2,-.5,1/3], heuristic=-0.22783447302409138)
+        self.assertEdge(init, np.array([3]), m, [2,-.5,1/3], heuristic=-0.22783447302409138)
+
+        # Eigth simulation - Q value should now be positive.
+        m.simulate(init)
+        s_prev = lf.take_action(init, np.array([0,1,0,0,0,0,0,0,0,0]))
+        s_prev = lf.take_action(s_prev, np.array([0,0,0,1,0,0,0,0,0,0]))
+        s = lf.take_action(s_prev, np.array([0,0,0,0,1,0,0,0,0,0]))
+        self.assertIn(m.np_hash(s), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 8)
+        self.assertExpanded(s, m)
+        self.assertEdge(init, np.array([1]), m, [3,-1/6,1/3], heuristic=0.05381260925538256)
+
+        # Something new: simulate starting from a node other than the root.
+        # We should receive -.5 during propagtion because we switched perspectives.
+        self.assertEdge(s_prev, np.array([4]), m, [1,-.5,1/3], heuristic=-0.33333333333333337)
+        m.simulate(s_prev) # We are now player 3.
+        self.assertEdge(s_prev, np.array([5]), m, [1,-.5,1/3], heuristic=-0.26429773960448416)
+
+        # Run alot. This test is here to ensure future changes don't brake this seemingly correct implementation.
+        for _ in range(1000):
+            m.simulate(init)
+
+        # We have learned that player 0's optimal strategy is to take a step of size 3
+        self.assertEdge(init, np.array([1]), m, [28, -0.26785714285714285, 0.3333333333333333], 0.09689301007670609)
+        self.assertEdge(init, np.array([2]), m, [60, -0.05000000000000002, 0.3333333333333333], 0.12340581041117407)
+        self.assertEdge(init, np.array([3]), m, [919, 0.12459194776931437, 0.3333333333333333], 0.13608950693788135)
+
         
+
+
 
 
 

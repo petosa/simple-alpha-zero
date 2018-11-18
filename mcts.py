@@ -1,6 +1,5 @@
 import math
 import numpy as np
-from tictactoe import TicTacToe
 
 # Concerns: Add epsilon amount to UCB evaluation to ensure probability is considered
 # Caveat: Q in heuristic might obviate this.
@@ -51,30 +50,3 @@ class MCTS():
                 self.tree[hashed_s][self.np_hash(a)] = [a, 0, 0, p[tuple(a)]/norm] # S', N, Q, P
             return v, current_player
 
-
-
-
-# Test code, ignore this
-'''
-import time
-import numpy as np
-from neural_network import NeuralNetwork
-
-# Always predicts a value of 0.5 for a node and a uniform distribution over actions.
-class DumbNet(NeuralNetwork):
-    def __init__(self, game): self.game = game
-    def predict(self, s): return np.ones_like(self.game.get_available_actions(self.game.get_initial_state())), 0.5
-
-
-t = TicTacToe()
-m = MCTS(t, DumbNet(t))
-start = time.clock()
-N = 10000
-
-for _ in range(N):
-    m.simulate(t.get_initial_state())
-print((time.clock() - start))
-
-
-print(list(m.tree.values())[0])
-'''
