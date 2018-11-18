@@ -9,6 +9,32 @@ from game import Game
 # You hop starting from where the last player left off.
 # The winner is whichever player lands in the last space.
 
+
+class ThreePlayerLinearLeapFrog(Game):
+    def __init__(self): self.n = 6
+    def get_initial_state(self):
+        arr = np.zeros((self.n, 1, 2), dtype=np.float32)
+        arr[0,0,0] = 1 # Start all the way on the left.
+        return arr
+    def get_available_actions(self, s):
+        s = s.copy()
+        path = s[:,0,0]
+        i = np.argwhere(path == 1)[0,0]
+        path[i] = 0
+        path[i+1] = 1
+        return path.astype(np.bool)
+    def check_winner(self, s):
+        return None if s[-1,0,0] == 0 else (int(s[0,0,1]) - 1) % 3
+    def take_action(self, s, a):
+        s = s.copy()
+        s[:,:,0] = 0
+        s[:,0,0] += a.astype(np.float32) # Next move
+        s[:,:,1] = (s[:,:,1] + 1) % 3 # Toggle player
+        return s
+    def get_player(self, s):
+        return int(s[0,0,1])
+
+
 class ThreePlayerLeapFrog(Game):
     def __init__(self): self.n = 10
     def get_initial_state(self):

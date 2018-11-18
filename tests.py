@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 from games.guessit import OnePlayerGuessIt, TwoPlayerGuessIt
-from games.leapfrog import ThreePlayerLeapFrog
+from games.leapfrog import ThreePlayerLeapFrog, ThreePlayerLinearLeapFrog
 from mcts import MCTS
 from neural_network import NeuralNetwork
 
@@ -202,6 +202,89 @@ class GuessItTest(MCTSTest):
 
 
 class LeapFrogTest(MCTSTest):
+
+    def test_three_player_linear_leap_frog(self):
+        lf = ThreePlayerLinearLeapFrog()
+        d = DumbNet(lf)
+        m = MCTS(lf, d)
+        self.assertEqual(m.tree, {})
+        init = lf.get_initial_state()
+
+        # First simulation
+        m.simulate(init) # Adds root and outward edges
+        self.assertIn(m.np_hash(init), m.tree) # Root added to tree
+        self.assertEqual(len(m.tree), 1)
+        self.assertExpanded(init, m)
+
+        # Second simulation
+        m.simulate(init)
+        s1 = lf.take_action(init, np.array([0,1,0,0,0,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s1), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 2)
+        self.assertExpanded(s1, m)
+        self.assertEdge(init, np.array([1]), m, [1,-.5,1], heuristic=0)
+        self.assertEdge(s1, np.array([2]), m, [0,0,1], heuristic=0)
+
+        # Third simulation
+        m.simulate(init)
+        s2 = lf.take_action(s1, np.array([0,0,1,0,0,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s2), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 3)
+        self.assertExpanded(s2, m)
+        self.assertEdge(init, np.array([1]), m, [2,-.5,1], heuristic=-0.028595479208968266)
+        self.assertEdge(s1, np.array([2]), m, [1,-.5,1], heuristic=0)
+        self.assertEdge(s2, np.array([3]), m, [0,0,1], heuristic=0)
+
+        # Fourth simulation
+        m.simulate(init)
+        s3 = lf.take_action(s2, np.array([0,0,0,1,0,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s3), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 4)
+        self.assertExpanded(s3, m)
+        self.assertEdge(init, np.array([1]), m, [3,-1/6,1], heuristic=0.26634603522555267)
+        self.assertEdge(s1, np.array([2]), m, [2,-.5,1], heuristic=-0.028595479208968266)
+        self.assertEdge(s2, np.array([3]), m, [1,-.5,1], heuristic=0)
+        self.assertEdge(s3, np.array([4]), m, [0,0,1], heuristic=0)
+
+        # Fifth simulation
+        m.simulate(init)
+        s4 = lf.take_action(s3, np.array([0,0,0,0,1,0])) # Takes first action since uniform
+        self.assertIn(m.np_hash(s4), m.tree) # Node added to tree
+        self.assertEqual(len(m.tree), 5)
+        self.assertExpanded(s4, m)
+        self.assertEdge(init, np.array([1]), m, [4,-.25,1], heuristic=0.15000000000000002)
+        self.assertEdge(s1, np.array([2]), m, [3,-1/6,1], heuristic=0.26634603522555267)
+        self.assertEdge(s2, np.array([3]), m, [2,-.5,1], heuristic=-0.028595479208968266)
+        self.assertEdge(s3, np.array([4]), m, [1,-.5,1], heuristic=0)
+        self.assertEdge(s4, np.array([5]), m, [0,0,1], heuristic=0)
+
+        # Sixth simulation - terminal state
+        m.simulate(init)
+        self.assertEqual(len(m.tree), 5)
+        self.assertEdge(init, np.array([1]), m, [5,-.4,1], heuristic=-0.027322003750035073)
+        self.assertEdge(s1, np.array([2]), m, [4,.125,1], heuristic=0.525)
+        self.assertEdge(s2, np.array([3]), m, [3,-2/3,1], heuristic=-0.23365396477444733)
+        self.assertEdge(s3, np.array([4]), m, [2,-.75,1], heuristic=-0.27859547920896827)
+        self.assertEdge(s4, np.array([5]), m, [1,1,1], heuristic=1.5)
+
+        # Simulate from end of chain
+        m.simulate(s4)
+        self.assertEqual(len(m.tree), 5)
+        self.assertEdge(init, np.array([1]), m, [5,-.4,1], heuristic=-0.027322003750035073)
+        self.assertEdge(s1, np.array([2]), m, [4,.125,1], heuristic=0.525)
+        self.assertEdge(s2, np.array([3]), m, [3,-2/3,1], heuristic=-0.23365396477444733)
+        self.assertEdge(s3, np.array([4]), m, [2,-.75,1], heuristic=-0.27859547920896827)
+        self.assertEdge(s4, np.array([5]), m, [2,1,1], heuristic=1.4714045207910318)
+
+        # Simulate from middle of chain
+        m.simulate(s3)
+        self.assertEqual(len(m.tree), 5)
+        self.assertEdge(init, np.array([1]), m, [5,-.4,1], heuristic=-0.027322003750035073)
+        self.assertEdge(s1, np.array([2]), m, [4,.125,1], heuristic=0.525)
+        self.assertEdge(s2, np.array([3]), m, [3,-2/3,1], heuristic=-0.23365396477444733)
+        self.assertEdge(s3, np.array([4]), m, [3,-5/6,1], heuristic=-0.40032063144111407)
+        self.assertEdge(s4, np.array([5]), m, [3,1,1], heuristic=1.4330127018922192)
+
 
     def test_three_player_leap_frog(self):
         lf = ThreePlayerLeapFrog()
