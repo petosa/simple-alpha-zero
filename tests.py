@@ -18,34 +18,19 @@ class MCTSTest(unittest.TestCase):
     def assertExpanded(self, state, mcts):
         hashed_s = mcts.np_hash(state)
         num_actions = len(mcts.tree[hashed_s])
-        for k in mcts.tree[hashed_s]:
-            v = mcts.tree[hashed_s][k]
-            self.assertListEqual(v[1:], [0, 0, 1/num_actions])
-            self.assertEqual(k, mcts.np_hash(v[0]))
+        for v in mcts.tree[hashed_s]:
+            self.assertListEqual(list(v[1:]), [0, 0, 1/num_actions])
 
     # Allows you to check edge statistics (N, Q, P)
     def assertEdge(self, state, action, mcts, statistics, heuristic=None):
-        self.assertListEqual(mcts.tree[mcts.np_hash(state)][mcts.np_hash(action)][1:], statistics)
+        true_stats = mcts.tree[mcts.np_hash(state)]
+        i = np.where((np.array(true_stats[:,0].tolist()) == tuple(action)).all(axis=1))[0][0]
+        self.assertListEqual(list(mcts.tree[mcts.np_hash(state)][i,1:]), statistics)
         if heuristic != None:
-            n_total = 0
-            for stat in mcts.tree[mcts.np_hash(state)].values():
-                n_total += stat[1]
+            n_total = true_stats[:,1].sum()
             self.assertEqual(statistics[1] + statistics[2]*(n_total**.5/(1+statistics[0])), heuristic)
 
 class GuessItTest(MCTSTest):
-
-    def time(self):
-        import time
-        gi = OnePlayerGuessIt()
-        d = DumbNet(gi)
-        m = MCTS(gi, d)
-        start = time.clock()
-        s = gi.get_initial_state()
-        for _ in range(1600):
-            m.simulate(s)
-        stop = time.clock()
-        print(stop - start)
-
 
     # Test that our MCTS behaves as expected for a one-player game of guess-it
     def test_one_player_guess_it(self):

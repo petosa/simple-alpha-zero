@@ -9,7 +9,7 @@ from game import Game
 # You hop starting from where the last player left off.
 # The winner is whichever player lands in the last space.
 
-
+# This version of leapfrog only supports hopping 1 space forward.
 class ThreePlayerLinearLeapFrog(Game):
     def __init__(self): self.n = 6
     def get_initial_state(self):
@@ -34,7 +34,7 @@ class ThreePlayerLinearLeapFrog(Game):
     def get_player(self, s):
         return int(s[0,0,1])
 
-
+# This version of leapfrog supports hopping 1, 2 or 3 spaces forward.
 class ThreePlayerLeapFrog(Game):
     def __init__(self): self.n = 10
     def get_initial_state(self):
