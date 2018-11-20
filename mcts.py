@@ -44,8 +44,8 @@ class MCTS():
             self.tree[hashed_s] = {} # Empty dictionary of children
             available_actions = self.game.get_available_actions(s)
             idx = np.stack(np.where(available_actions)).T
-            p, v = self.nn.predict(s)
-            valid_actions = p[available_actions]
+            p, v = self.nn.predict(s[:,:,0])
+            valid_actions = p[available_actions.flatten()]
             stats = np.zeros((len(idx), 4), dtype=np.object)
             stats[:,-1] = valid_actions/valid_actions.sum()
             stats[:,0] = list(idx)

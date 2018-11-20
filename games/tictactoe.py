@@ -1,10 +1,16 @@
 import numpy as np
 import sys
-sys.path.append("..")
 from game import Game
 
 
 class TicTacToe(Game):
+
+    def __init__(self, n=3):
+        self.n = n
+    def getBoardSize(self):
+        return (self.n, self.n)
+    def getActionSize(self):
+        return self.n*self.n
 
     def get_initial_state(self):
         return np.zeros((3, 3, 2 + 1), dtype=np.float32) # Final plane is a turn indicator
