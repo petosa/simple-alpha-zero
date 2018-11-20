@@ -14,6 +14,11 @@ class OnePlayerGuessIt(Game):
     def check_winner(self, s): return None if s[1,1] == 0 else 0
     def take_action(self, s, a): return s + a.astype(np.float32)
     def get_player(self, s): return 0
+    def friendly_print(self, s):
+        board = np.ones((2,2)).astype(np.object)
+        board[:,:] = " "
+        board[s == 1] = 'a'
+        print(board)
 
 class TwoPlayerGuessIt(Game):
     def __init__(self): self.n = 2
@@ -31,4 +36,10 @@ class TwoPlayerGuessIt(Game):
         s[:,:,2] = (s[:,:,2] + 1) % 2 # Toggle player
         return s
     def get_player(self, s): return int(s[0,0,2])
+    def friendly_print(self, s):
+        board = np.ones((2,2)).astype(np.object)
+        board[:,:] = " "
+        board[s[:,:,0] == 1] = 'a'
+        board[s[:,:,1] == 1] = 'b'
+        print(board)
 

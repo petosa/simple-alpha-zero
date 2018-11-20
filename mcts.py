@@ -22,17 +22,18 @@ class MCTS():
         current_player = self.game.get_player(s)
         if hashed_s in self.tree: # Not at leaf; select.
             stats = self.tree[hashed_s]
-            u = cpuct*stats[:,3]*math.sqrt(stats[:,1].sum())/(1 + stats[:,1])
-            heuristic = stats[:,2] + u # Q + U
+            N, Q, P = stats[:,1], stats[:,2], stats[:,3]
+            U = cpuct*P*math.sqrt(N.sum())/(1 + N)
+            heuristic = Q + U
             best_a_idx = np.argmax(heuristic)
             best_a = stats[best_a_idx, 0] # Pick best action to take
             template = np.zeros_like(self.game.get_available_actions(s)) # Submit action to get s'
             template[tuple(best_a)] = 1
             s_prime = self.game.take_action(s, template)
             v, winning_player = self.simulate(s_prime) # Forward simulate with this action
-            N, Q = stats[best_a_idx, 1], stats[best_a_idx, 2]
+            n, q = N[best_a_idx], Q[best_a_idx]
             adj_v = v if current_player == winning_player else -v
-            self.tree[hashed_s][best_a_idx, 2] = (N*Q+adj_v)/(N + 1)
+            self.tree[hashed_s][best_a_idx, 2] = (n*q+adj_v)/(n + 1)
             self.tree[hashed_s][best_a_idx, 1] += 1
             return v, winning_player
 
@@ -51,4 +52,20 @@ class MCTS():
             stats[:,0] = list(idx)
             self.tree[hashed_s] = stats
             return v, current_player
+
+
+    # Returns the MCTS policy distribution for the given state
+    def get_distribution(self, s, temperature):
+        hashed_s = self.np_hash(s)
+        stats = self.tree[hashed_s][:,:2]
+        N = stats[:,1]
+        try:
+            raised = np.power(N, 1/temperature)
+        except (ZeroDivisionError, OverflowError):
+            raised = np.zeros_like(N)
+            raised[N.argmax()] = 1
+        dist = raised/raised.sum()
+        stats[:,1] = dist
+        return stats
+        
 

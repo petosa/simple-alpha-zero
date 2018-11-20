@@ -17,22 +17,39 @@ class ThreePlayerLinearLeapFrog(Game):
         arr[0,0,0] = 1 # Start all the way on the left.
         return arr
     def get_available_actions(self, s):
-        s = s.copy()
         path = s[:,0,0]
         i = np.argwhere(path == 1)[0,0]
-        path[i] = 0
-        path[i+1] = 1
-        return path.astype(np.bool)
+        spots_left = len(path) - i - 1
+        available = np.zeros(1)
+        if spots_left > 0:
+            available[0] = 1
+        return available.astype(np.bool)
     def check_winner(self, s):
         return None if s[-1,0,0] == 0 else (int(s[0,0,1]) - 1) % 3
     def take_action(self, s, a):
         s = s.copy()
-        s[:,:,0] = 0
-        s[:,0,0] += a.astype(np.float32) # Next move
+        path = s[:,0,0]
+        i = np.argwhere(path == 1)[0]
+        path = s[:,0,0] = 0
+        s[i+1,0,0] = a.astype(np.float32) # Next move
         s[:,:,1] = (s[:,:,1] + 1) % 3 # Toggle player
         return s
     def get_player(self, s):
         return int(s[0,0,1])
+    def friendly_print(self, s):
+        path = s[:,0, 0]
+        board = np.zeros_like(path, dtype=np.object)
+        board[:] = "_"
+        if s[0,0,0] == 1:
+            token = 'start'
+        elif self.get_player(s) == 1:
+            token = 'a'
+        elif self.get_player(s) == 2:
+            token = 'b'
+        elif self.get_player(s) == 0:
+            token = 'c'
+        board[path == 1] = token
+        print(board)
 
 # This version of leapfrog supports hopping 1, 2 or 3 spaces forward.
 class ThreePlayerLeapFrog(Game):
@@ -42,19 +59,36 @@ class ThreePlayerLeapFrog(Game):
         arr[0,0,0] = 1 # Start all the way on the left.
         return arr
     def get_available_actions(self, s):
-        s = s.copy()
         path = s[:,0,0]
         i = np.argwhere(path == 1)[0,0]
-        path[i] = 0
-        path[i+1:i+4] = 1
-        return path.astype(np.bool)
+        spots_left = len(path) - i - 1
+        available = np.zeros(3)
+        available[:spots_left] = 1
+        return available.astype(np.bool)
     def check_winner(self, s):
         return None if s[-1,0,0] == 0 else (int(s[0,0,1]) - 1) % 3
     def take_action(self, s, a):
         s = s.copy()
-        s[:,:,0] = 0
-        s[:,0,0] += a.astype(np.float32) # Next move
+        path = s[:,0,0]
+        i = np.argwhere(path == 1)[0,0]
+        j = np.argwhere(a == 1)[0] + 1
+        path = s[:,0,0] = 0
+        s[i+j,0,0] = 1.0 # Next move
         s[:,:,1] = (s[:,:,1] + 1) % 3 # Toggle player
         return s
     def get_player(self, s):
         return int(s[0,0,1])
+    def friendly_print(self, s):
+        path = s[:,0, 0]
+        board = np.zeros_like(path, dtype=np.object)
+        board[:] = "_"
+        if s[0,0,0] == 1:
+            token = 'start'
+        elif self.get_player(s) == 1:
+            token = 'a'
+        elif self.get_player(s) == 2:
+            token = 'b'
+        elif self.get_player(s) == 0:
+            token = 'c'
+        board[path == 1] = token
+        print(board)
