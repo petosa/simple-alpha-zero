@@ -4,7 +4,7 @@ sys.path.append("..")
 from mcts import MCTS
 from player import Player
 
-class DeepMCTS(Player):
+class DeepMCTSPlayer(Player):
 
     def __init__(self, game, nn, simulations):
         self.game = game

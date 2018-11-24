@@ -3,7 +3,7 @@ import numpy as np
 sys.path.append("..")
 from player import Player
 
-class Human(Player):
+class HumanPlayer(Player):
 
     def __init__(self, game):
         self.game = game

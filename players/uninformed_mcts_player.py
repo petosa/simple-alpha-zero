@@ -3,14 +3,16 @@ import numpy as np
 sys.path.append("..")
 from mcts import MCTS
 from player import Player
-from networks.dumbnet import DumbNet
+from models.dumbnet import DumbNet
+from neural_network import NeuralNetwork
 
-class UninformedMCTS(Player):
+class UninformedMCTSPlayer(Player):
 
     def __init__(self, game, simulations):
         self.game = game
         self.simulations = simulations
-        self.tree = MCTS(game, DumbNet(game))
+        nn = NeuralNetwork(game, DumbNet)
+        self.tree = MCTS(game, nn)
 
     def update_state(self, s):
         for _ in range(self.simulations):

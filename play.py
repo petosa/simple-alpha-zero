@@ -16,11 +16,15 @@ def play_match(game, players, verbose=False):
 
 
 if __name__ == "__main__":
-    from players.human_player import Human
-    from players.uninformed_mcts_player import UninformedMCTS
+    from players.human_player import HumanPlayer
+    from players.uninformed_mcts_player import UninformedMCTSPlayer
+    from players.deep_mcts_player import DeepMCTSPlayer
     from games.tictactoe import TicTacToe
     from games.guessit import OnePlayerGuessIt, TwoPlayerGuessIt
     from games.leapfrog import ThreePlayerLeapFrog, ThreePlayerLinearLeapFrog
+    from neural_network import NeuralNetwork
+    from models.mlp import MLP
+    from models.minivgg import MiniVGG
 
     t = TicTacToe()
     gi1 = OnePlayerGuessIt()
@@ -32,30 +36,40 @@ if __name__ == "__main__":
     # Human v Human games #
     #######################
 
-    #h1, h2 = Human(t), Human(t)
+    #h1, h2 = HumanPlayer(t), HumanPlayer(t)
     #r = play_match(t, [h1, h2], verbose=True)
 
-    #h1 = Human(gi1)
+    #h1 = HumanPlayer(gi1)
     #r = play_match(gi1, [h1], verbose=True)
 
-    #h1, h2 = Human(gi2), Human(gi2)
+    #h1, h2 = HumanPlayer(gi2), HumanPlayer(gi2)
     #r = play_match(gi2, [h1, h2], verbose=True)
 
-    #h1, h2, h3 = Human(llf3), Human(llf3), Human(llf3)
+    #h1, h2, h3 = HumanPlayer(llf3), HumanPlayer(llf3), HumanPlayer(llf3)
     #r = play_match(llf3, [h1, h2, h3], verbose=True)
 
-    #h1, h2, h3 = Human(lf3), Human(lf3), Human(lf3)
+    #h1, h2, h3 = HumanPlayer(lf3), HumanPlayer(lf3), HumanPlayer(lf3)
     #r = play_match(lf3, [h1, h2, h3], verbose=True)
 
     #######################
     # Human v UMCTS games #
     #######################
 
-    h1, u1 = UninformedMCTS(t, 100), UninformedMCTS(t, 10000)
-    r = play_match(t, [u1, h1], verbose=True)
+    #h1, u1 = HumanPlayer(t), UninformedMCTSPlayer(t, 10000)
+    #r = play_match(t, [h1, u1], verbose=True)
 
-    #h1, u1, u2 = Human(lf3), UninformedMCTS(llf3, 10), UninformedMCTS(lf3, 10)
+    #h1, u1, u2 = HumanPlayer(lf3), UninformedMCTSPlayer(llf3, 10), UninformedMCTSPlayer(lf3, 10)
     #r = play_match(lf3, [h1, u1, u2], verbose=True)
+
+    #######################
+    # Human v DMCTS games #
+    #######################
+
+    nn = NeuralNetwork(t, MiniVGG)
+    nn.load("520")
+    h1, d1 = HumanPlayer(t), DeepMCTSPlayer(t, nn, 15)
+    r = play_match(t, [h1, d1], verbose=True)
+
 
     #######################
     # UMCTS v UMCTS games #
@@ -68,7 +82,7 @@ if __name__ == "__main__":
     for i in range(10, 1000, 100):
         for j in range(10, 1000, 100):
             t = TicTacToe()
-            u1, u2 = UninformedMCTS(t, i), UninformedMCTS(t, j)
+            u1, u2 = UninformedMCTSPlayer(t, i), UninformedMCTSPlayer(t, j)
             r = play_match(t, [u1, u2], verbose=False)
             log.append(r)
             print(r)

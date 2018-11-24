@@ -13,8 +13,9 @@ from game import Game
 class ThreePlayerLinearLeapFrog(Game):
     def __init__(self): self.n = 6
     def get_initial_state(self):
-        arr = np.zeros((self.n, 1, 2), dtype=np.float32)
+        arr = np.zeros((self.n, 1, 4), dtype=np.float32)
         arr[0,0,0] = 1 # Start all the way on the left.
+        arr[:,:,1] = 1 # Player 1 starts
         return arr
     def get_available_actions(self, s):
         path = s[:,0,0]
@@ -25,17 +26,20 @@ class ThreePlayerLinearLeapFrog(Game):
             available[0] = 1
         return available.astype(np.bool)
     def check_winner(self, s):
-        return None if s[-1,0,0] == 0 else (int(s[0,0,1]) - 1) % 3
+        return None if s[-1,0,0] == 0 else (self.get_player(s) - 1) % 3
     def take_action(self, s, a):
         s = s.copy()
         path = s[:,0,0]
         i = np.argwhere(path == 1)[0]
         path = s[:,0,0] = 0
         s[i+1,0,0] = a.astype(np.float32) # Next move
-        s[:,:,1] = (s[:,:,1] + 1) % 3 # Toggle player
+        p = self.get_player(s) + 1
+        s[:,:,p] = 0
+        s[:,:,(p%3) + 1] = 1 # Toggle player
         return s
     def get_player(self, s):
-        return int(s[0,0,1])
+        vec = s[0,0,1:]
+        return int(np.where(vec==1)[0][0])
     def friendly_print(self, s):
         path = s[:,0, 0]
         board = np.zeros_like(path, dtype=np.object)
@@ -55,8 +59,9 @@ class ThreePlayerLinearLeapFrog(Game):
 class ThreePlayerLeapFrog(Game):
     def __init__(self): self.n = 10
     def get_initial_state(self):
-        arr = np.zeros((self.n, 1, 2), dtype=np.float32)
+        arr = np.zeros((self.n, 1, 4), dtype=np.float32)
         arr[0,0,0] = 1 # Start all the way on the left.
+        arr[:,:,1] = 1 # Player 1 starts
         return arr
     def get_available_actions(self, s):
         path = s[:,0,0]
@@ -66,7 +71,7 @@ class ThreePlayerLeapFrog(Game):
         available[:spots_left] = 1
         return available.astype(np.bool)
     def check_winner(self, s):
-        return None if s[-1,0,0] == 0 else (int(s[0,0,1]) - 1) % 3
+        return None if s[-1,0,0] == 0 else (self.get_player(s) - 1) % 3
     def take_action(self, s, a):
         s = s.copy()
         path = s[:,0,0]
@@ -74,10 +79,13 @@ class ThreePlayerLeapFrog(Game):
         j = np.argwhere(a == 1)[0] + 1
         path = s[:,0,0] = 0
         s[i+j,0,0] = 1.0 # Next move
-        s[:,:,1] = (s[:,:,1] + 1) % 3 # Toggle player
+        p = self.get_player(s) + 1
+        s[:,:,p] = 0
+        s[:,:,(p%3) + 1] = 1 # Toggle player
         return s
     def get_player(self, s):
-        return int(s[0,0,1])
+        vec = s[0,0,1:]
+        return int(np.where(vec==1)[0][0])
     def friendly_print(self, s):
         path = s[:,0, 0]
         board = np.zeros_like(path, dtype=np.object)

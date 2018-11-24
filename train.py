@@ -1,23 +1,24 @@
 import numpy as np
 from mcts import MCTS
 from play import play_match
-from players.uninformed_mcts_player import UninformedMCTS
-from players.deep_mcts_player import DeepMCTS
+from neural_network import NeuralNetwork
+from players.uninformed_mcts_player import UninformedMCTSPlayer
+from players.deep_mcts_player import DeepMCTSPlayer
 
 class Trainer:
 
-    def __init__(self, game, nn, simulations, verbose=False):
+    def __init__(self, game, nn, simulations, cpuct=1):
         self.game = game
         self.nn = nn
         self.simulations = simulations
-        self.verbose = verbose
+        self.training_data = np.zeros((0,3))
+        self.cpuct = cpuct
 
 
     # Does one game of self play and generates training samples
     def self_play(self, temperature):
         s = self.game.get_initial_state()
         tree = MCTS(self.game, self.nn)
-        #if self.verbose: self.game.friendly_print(s)
 
         data = []
         w = None
@@ -25,7 +26,7 @@ class Trainer:
 
             # Think
             for _ in range(self.simulations):
-                tree.simulate(s)
+                tree.simulate(s, cpuct=self.cpuct)
 
             # Fetch action distribution and append training example template.
             dist = tree.get_distribution(s, temperature=temperature)
@@ -43,7 +44,6 @@ class Trainer:
 
             # Check winner
             w = self.game.check_winner(s)
-            #if self.verbose: self.game.friendly_print(s)
 
         # Update training examples with outcome
         data = np.array(data)
@@ -57,34 +57,62 @@ class Trainer:
 
 
     def policy_iteration(self):
-        
-        temperature = .5
-        training_data = []
-        for _ in range(10): # Self-play games
-            training_data.append(self.self_play(temperature))
-        training_data = np.concatenate(training_data, axis=0)
-        print(training_data.shape)
-        self.nn.train(training_data)
-        uninformed, informed = UninformedMCTS(self.game, self.simulations), DeepMCTS(self.game, self.nn, self.simulations)
-        
+        temperature = 1
+        for _ in range(100): # Self-play games
+            new_data = self.self_play(temperature)
+            self.training_data = np.concatenate([self.training_data, new_data], axis=0)
+        #self.training_data = self.training_data[-200000:,:]
+        self.nn.train(self.training_data)
+
+
+    def evaluate_against_uninformed(self, uninformed_simulations):
+        uninformed, informed = UninformedMCTSPlayer(self.game, uninformed_simulations), DeepMCTSPlayer(self.game, self.nn, self.simulations)
         first = play_match(self.game, [informed, uninformed])
+        first = ["Win", "Lose", "Tie"][first]
         second = play_match(self.game, [uninformed, informed])
-        if self.verbose:
-            print("When I play first: {}     When I play second: {}".format(first, second))
-            print(self.nn.predict(self.game.get_initial_state()))
+        second = ["Lose", "Win", "Tie"][second]
+        print("Opponent strength: {}     When I play first: {}     When I play second: {}".format(uninformed_simulations,first, second))
 
 
 
 
 if __name__=="__main__":
-    from networks.mlp import MLP
+    from models.mlp import MLP
+    from models.minivgg import MiniVGG
     from games.tictactoe import TicTacToe
+    from games.guessit import TwoPlayerGuessIt
 
     t = TicTacToe()
-    d = MLP(t)
-    
-    pi = Trainer(t, d, 100, True)
-    for _ in range(100):
-        pi.policy_iteration()
+    gi = TwoPlayerGuessIt()
+
+    model = MiniVGG
+    game = t
+
+    nn = NeuralNetwork(game, model, num_updates=100, weight_decay=1e-4)
+    pi = Trainer(game=game, nn=nn, simulations=15, cpuct=3)
+    iteration = 0
+    for _ in range(10000):
+        for _ in range(10):
+            pi.policy_iteration()
+            iteration += 1
+        
+        nn.save(name=iteration)
+        #pi.evaluate_against_uninformed(1000)
+        pi.evaluate_against_uninformed(15)
+        pi.evaluate_against_uninformed(100)
+        pi.evaluate_against_uninformed(500)
+        pi.evaluate_against_uninformed(1000)
+
+        #pi.evaluate_against_uninformed(10000)
+
+        
+
+        template = np.zeros_like(game.get_available_actions(game.get_initial_state()))
+        template[0,0] = 1
+        second = game.take_action(game.get_initial_state(), template)
+        pred = nn.predict(second)
+        print(pred[0][3], nn.latest_loss, len(pi.training_data))
+        
+
 
 
