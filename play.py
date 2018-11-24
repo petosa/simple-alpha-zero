@@ -66,7 +66,7 @@ if __name__ == "__main__":
     #######################
 
     nn = NeuralNetwork(t, MiniVGG)
-    nn.load("520")
+    nn.load("500")
     h1, d1 = HumanPlayer(t), DeepMCTSPlayer(t, nn, 15)
     r = play_match(t, [h1, d1], verbose=True)
 

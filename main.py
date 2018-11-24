@@ -51,7 +51,7 @@ while True:
     second = game.take_action(game.get_initial_state(), template)
     pred = nn.predict(second)
     # Report statistics
-    print(pred[0][3], nn.latest_loss, len(pi.training_data))
+    print(nn.latest_loss, len(pi.training_data))
     
 
 
