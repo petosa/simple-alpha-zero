@@ -6,10 +6,12 @@ from players.deep_mcts_player import DeepMCTSPlayer
 
 class Trainer:
 
-    def __init__(self, game, nn, simulations, cpuct=1):
+    def __init__(self, game, nn, num_simulations,  num_games, num_updates, cpuct=1):
         self.game = game
         self.nn = nn
-        self.simulations = simulations
+        self.num_simulations = num_simulations
+        self.num_updates = num_updates
+        self.num_games = num_games
         self.training_data = np.zeros((0,3))
         self.cpuct = cpuct
 
@@ -24,7 +26,7 @@ class Trainer:
         while w is None:
 
             # Think
-            for _ in range(self.simulations):
+            for _ in range(self.num_simulations):
                 tree.simulate(s, cpuct=self.cpuct)
 
             # Fetch action distribution and append training example template.
@@ -55,17 +57,23 @@ class Trainer:
         return data[:,1:]
 
 
+    # Performs one iteration of policy improvement.
+    # Creates some number of games, then updates network parameters some number of times.
     def policy_iteration(self):
         temperature = 1
-        for _ in range(100): # Self-play games
+        
+        for _ in range(self.num_games): # Self-play games
             new_data = self.self_play(temperature)
             self.training_data = np.concatenate([self.training_data, new_data], axis=0)
         #self.training_data = self.training_data[-200000:,:]
-        self.nn.train(self.training_data)
+
+        for _ in range(self.num_updates):
+            self.nn.train(self.training_data)
 
 
     def evaluate_against_uninformed(self, uninformed_simulations):
-        uninformed, informed = UninformedMCTSPlayer(self.game, uninformed_simulations), DeepMCTSPlayer(self.game, self.nn, self.simulations)
+        uninformed= UninformedMCTSPlayer(self.game, uninformed_simulations)
+        informed = DeepMCTSPlayer(self.game, self.nn, self.num_simulations)
         first = play_match(self.game, [informed, uninformed])
         first = ["Win", "Lose", "Tie"][first]
         second = play_match(self.game, [uninformed, informed])

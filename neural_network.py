@@ -5,10 +5,9 @@ import os
 
 class NeuralNetwork():
 
-    def __init__(self, game, model_class, lr=1e-3, weight_decay=1e-8, batch_size=64, num_updates=100):
+    def __init__(self, game, model_class, lr=1e-3, weight_decay=1e-8, batch_size=64):
         self.game = game
         self.batch_size = batch_size
-        self.num_updates = num_updates
         input_shape = game.get_initial_state().shape
         p_shape = game.get_available_actions(game.get_initial_state()).shape
         self.model = model_class(input_shape, p_shape)
@@ -20,18 +19,17 @@ class NeuralNetwork():
     def train(self, data):
         self.model.train()
         batch_size=self.batch_size
-        for _ in range(self.num_updates):
-            idx = np.random.randint(len(data), size=batch_size)
-            batch = data[idx]
-            states = np.stack(batch[:,0])
-            x = torch.from_numpy(states)
-            p_pred, v_pred = self.model(x)
-            v_pred = v_pred.view(-1)
-            p_gt, v_gt = batch[:,1], torch.from_numpy(batch[:,2].astype(np.float32))
-            loss = self.loss(states, (p_pred, v_pred), (p_gt, v_gt))
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()
+        idx = np.random.randint(len(data), size=batch_size)
+        batch = data[idx]
+        states = np.stack(batch[:,0])
+        x = torch.from_numpy(states)
+        p_pred, v_pred = self.model(x)
+        v_pred = v_pred.view(-1)
+        p_gt, v_gt = batch[:,1], torch.from_numpy(batch[:,2].astype(np.float32))
+        loss = self.loss(states, (p_pred, v_pred), (p_gt, v_gt))
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
         self.latest_loss = loss
     
     # Given a single state s, does inference to produce a distribution of valid moves P and a value V.

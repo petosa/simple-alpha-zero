@@ -15,7 +15,7 @@ class TrainTests(unittest.TestCase):
 
     def test_easy_train(self):
         gi = TwoPlayerGuessIt()
-        nn = NeuralNetwork(gi, MLP, weight_decay=0, num_updates=350, lr=1e-3)
+        nn = NeuralNetwork(gi, MLP, weight_decay=0, lr=1e-3)
 
         data = []
         s1 = gi.get_initial_state()
@@ -26,7 +26,8 @@ class TrainTests(unittest.TestCase):
         data.append([s3, np.array([.4,.6]), .1])
         data = np.array(data)
 
-        nn.train(data)
+        for _ in range(350):
+            nn.train(data)
 
         for row in data:
             s = row[0]
@@ -36,7 +37,7 @@ class TrainTests(unittest.TestCase):
 
     def test_tie_train(self):
         gi = TwoPlayerGuessIt()
-        nn = NeuralNetwork(gi, MLP, weight_decay=0, num_updates=600, lr=1e-4)
+        nn = NeuralNetwork(gi, MLP, weight_decay=0, lr=1e-4)
 
         data = []
         s1 = gi.get_initial_state()
@@ -45,7 +46,8 @@ class TrainTests(unittest.TestCase):
         # Should become [.35, .25, .15, .25], .4
         data = np.array(data)
 
-        nn.train(data)
+        for _ in range(600):
+            nn.train(data)
         p, v = nn.predict(s1)
         np.testing.assert_allclose(p, np.array([.35, .25, .15, .25], dtype=np.float32), atol=0.01)
         np.testing.assert_allclose(v, .4, atol=.02)

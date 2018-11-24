@@ -12,10 +12,11 @@ tictactoe_config = {
     "model": MiniVGG,
     "ckpt_frequency": 10,
     "num_updates": 100,
+    "num_games": 100,
     "weight_decay": 1e-4,
     "lr": 1e-3,
     "cpuct": 3,
-    "simulations": 15,
+    "num_simulations": 15,
     "batch_size": 64
 }
 
@@ -27,14 +28,15 @@ config = tictactoe_config
 # Instantiate
 game = config["game"]()
 nn = NeuralNetwork(game=game, model_class=config["model"], lr=config["lr"],
-    weight_decay=config["weight_decay"], batch_size=config["batch_size"], num_updates=config["num_updates"])
-pi = Trainer(game=game, nn=nn, simulations=config["simulations"], cpuct=config["cpuct"])
+    weight_decay=config["weight_decay"], batch_size=config["batch_size"])
+pi = Trainer(game=game, nn=nn, num_simulations=config["num_simulations"],
+num_games=config["num_games"], num_updates=config["num_updates"], cpuct=config["cpuct"])
 
 # Training loop
 iteration = 0
 while True:
     for _ in range(config["ckpt_frequency"]):
-        pi.policy_iteration()
+        pi.policy_iteration() # One iteration of PI
         iteration += 1
     
     nn.save(name=iteration)
