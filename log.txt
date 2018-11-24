@@ -1,0 +1,30 @@
+Opponent strength: 15     When I play first: Win     When I play second: Lose
+Opponent strength: 100     When I play first: Tie     When I play second: Tie
+Opponent strength: 500     When I play first: Tie     When I play second: Tie
+Opponent strength: 1000     When I play first: Tie     When I play second: Lose
+0.3110401 tensor(134.4237, grad_fn=<ThAddBackward>) 6737
+Opponent strength: 15     When I play first: Win     When I play second: Win
+Opponent strength: 100     When I play first: Tie     When I play second: Tie
+Opponent strength: 500     When I play first: Tie     When I play second: Tie
+Opponent strength: 1000     When I play first: Tie     When I play second: Tie
+0.33054534 tensor(113.0573, grad_fn=<ThAddBackward>) 13846
+Opponent strength: 15     When I play first: Win     When I play second: Win
+Opponent strength: 100     When I play first: Tie     When I play second: Tie
+Opponent strength: 500     When I play first: Tie     When I play second: Tie
+Opponent strength: 1000     When I play first: Tie     When I play second: Tie
+0.3070549 tensor(100.1097, grad_fn=<ThAddBackward>) 21196
+Opponent strength: 15     When I play first: Win     When I play second: Win
+Opponent strength: 100     When I play first: Tie     When I play second: Tie
+Opponent strength: 500     When I play first: Tie     When I play second: Tie
+Opponent strength: 1000     When I play first: Tie     When I play second: Tie
+0.2875597 tensor(94.6917, grad_fn=<ThAddBackward>) 28701
+Opponent strength: 15     When I play first: Win     When I play second: Win
+Opponent strength: 100     When I play first: Tie     When I play second: Tie
+Opponent strength: 500     When I play first: Tie     When I play second: Tie
+Opponent strength: 1000     When I play first: Tie     When I play second: Tie
+0.2783945 tensor(90.5952, grad_fn=<ThAddBackward>) 36296
+Opponent strength: 15     When I play first: Win     When I play second: Win
+Opponent strength: 100     When I play first: Tie     When I play second: Tie
+Opponent strength: 500     When I play first: Tie     When I play second: Tie
+Opponent strength: 1000     When I play first: Tie     When I play second: Tie
+0.21346428 tensor(91.3018, grad_fn=<ThAddBackward>) 44016
