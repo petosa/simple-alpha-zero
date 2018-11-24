@@ -61,11 +61,11 @@ class Trainer:
     # Creates some number of games, then updates network parameters some number of times.
     def policy_iteration(self):
         temperature = 1
-        
+
         for _ in range(self.num_games): # Self-play games
             new_data = self.self_play(temperature)
             self.training_data = np.concatenate([self.training_data, new_data], axis=0)
-        #self.training_data = self.training_data[-200000:,:]
+        # self.training_data = self.training_data[-200000:,:]
 
         for _ in range(self.num_updates):
             self.nn.train(self.training_data)
