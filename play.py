@@ -22,6 +22,7 @@ if __name__ == "__main__":
     from games.tictactoe import TicTacToe
     from games.guessit import OnePlayerGuessIt, TwoPlayerGuessIt
     from games.leapfrog import ThreePlayerLeapFrog, ThreePlayerLinearLeapFrog
+    from games.connect4 import Connect4
     from neural_network import NeuralNetwork
     from models.mlp import MLP
     from models.minivgg import MiniVGG
@@ -31,6 +32,7 @@ if __name__ == "__main__":
     gi2 = TwoPlayerGuessIt()
     llf3 = ThreePlayerLinearLeapFrog()
     lf3 = ThreePlayerLeapFrog()
+    c4 = Connect4()
     
     #######################
     # Human v Human games #
@@ -51,6 +53,9 @@ if __name__ == "__main__":
     #h1, h2, h3 = HumanPlayer(lf3), HumanPlayer(lf3), HumanPlayer(lf3)
     #r = play_match(lf3, [h1, h2, h3], verbose=True)
 
+    #h1, h2 = HumanPlayer(c4), HumanPlayer(c4)
+    #r = play_match(c4, [h1, h2], verbose=True)
+
     #######################
     # Human v UMCTS games #
     #######################
@@ -61,19 +66,25 @@ if __name__ == "__main__":
     #h1, u1, u2 = HumanPlayer(lf3), UninformedMCTSPlayer(llf3, 10), UninformedMCTSPlayer(lf3, 10)
     #r = play_match(lf3, [h1, u1, u2], verbose=True)
 
+    h1, u1= HumanPlayer(c4), UninformedMCTSPlayer(c4, 100)
+    r = play_match(c4, [h1, u1], verbose=True)
+
     #######################
     # Human v DMCTS games #
     #######################
 
-    nn = NeuralNetwork(t, MiniVGG)
-    nn.load("500")
-    h1, d1 = HumanPlayer(t), DeepMCTSPlayer(t, nn, 15)
-    r = play_match(t, [h1, d1], verbose=True)
+    #nn = NeuralNetwork(t, MiniVGG)
+    #nn.load("500")
+    #h1, d1 = HumanPlayer(t), DeepMCTSPlayer(t, nn, 15)
+    #r = play_match(t, [h1, d1], verbose=True)
 
 
     #######################
     # UMCTS v UMCTS games #
     #######################
+
+    #h1, h2 = UninformedMCTSPlayer(c4, 100), UninformedMCTSPlayer(c4, 500)
+    #r = play_match(c4, [h1, h2], verbose=True)
 
     '''
     import numpy as np

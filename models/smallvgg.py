@@ -6,14 +6,14 @@ sys.path.append("..")
 from model import Model
 
 
-class MiniVGG(Model):
+class SmallVGG(Model):
 
   def __init__(self, input_shape, output_shape):
-    super(MiniVGG, self).__init__(input_shape, output_shape)
-    num_hidden_units = 128
+    super(SmallVGG, self).__init__(input_shape, output_shape)
+    num_hidden_units = 768
     self.input_shape = input_shape
     self.output_shape = output_shape
-    self.conv1 = torch.nn.Conv2d(input_shape[-1], 64, 2)
+    self.conv1 = torch.nn.Conv2d(input_shape[-1], 64, 4)
     self.conv2 = torch.nn.Conv2d(64, 128, 2)
     self.p_head = torch.nn.Linear(num_hidden_units, np.prod(output_shape))
     self.v_head = torch.nn.Linear(num_hidden_units, 1)
