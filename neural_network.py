@@ -5,13 +5,13 @@ import os
 
 class NeuralNetwork():
 
-    def __init__(self, game, model_class, lr=1e-3, weight_decay=1e-8, batch_size=64, num_updates=100, **kwargs):
+    def __init__(self, game, model_class, lr=1e-3, weight_decay=1e-8, batch_size=64, num_updates=100):
         self.game = game
         self.batch_size = batch_size
         self.num_updates = num_updates
         input_shape = game.get_initial_state().shape
         p_shape = game.get_available_actions(game.get_initial_state()).shape
-        self.model = model_class(input_shape, p_shape, *kwargs)
+        self.model = model_class(input_shape, p_shape)
         if len(list(self.model.parameters())) > 0:
             self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
 
@@ -70,13 +70,13 @@ class NeuralNetwork():
     def get_valid_dist(self, s, logits, log_softmax=False):
         mask = torch.from_numpy(self.game.get_available_actions(s).astype(np.uint8))
         selection = torch.masked_select(logits, mask)
-        dist = torch.nn.functional.log_softmax(selection)
+        dist = torch.nn.functional.log_softmax(selection, dim=-1)
         if log_softmax:
             return dist
         return torch.exp(dist)
 
     def save(self, name):
-        directory = "checkpoints/{}".format(self.model.__class__.__name__)
+        directory = "checkpoints/{}-{}".format(self.game.__class__.__name__, self.model.__class__.__name__)
         if not os.path.exists(directory):
             os.makedirs(directory)
         path = "{}/{}.ckpt".format(directory, name)
@@ -86,7 +86,7 @@ class NeuralNetwork():
             }, path)
 
     def load(self, name):
-        path = "checkpoints/{}/{}.ckpt".format(self.model.__class__.__name__, name)
+        path = "checkpoints/{}-{}/{}.ckpt".format(self.game.__class__.__name__, self.model.__class__.__name__, name)
         checkpoint = torch.load(path)
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])

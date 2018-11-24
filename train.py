@@ -1,7 +1,6 @@
 import numpy as np
 from mcts import MCTS
 from play import play_match
-from neural_network import NeuralNetwork
 from players.uninformed_mcts_player import UninformedMCTSPlayer
 from players.deep_mcts_player import DeepMCTSPlayer
 
@@ -72,47 +71,4 @@ class Trainer:
         second = play_match(self.game, [uninformed, informed])
         second = ["Lose", "Win", "Tie"][second]
         print("Opponent strength: {}     When I play first: {}     When I play second: {}".format(uninformed_simulations,first, second))
-
-
-
-
-if __name__=="__main__":
-    from models.mlp import MLP
-    from models.minivgg import MiniVGG
-    from games.tictactoe import TicTacToe
-    from games.guessit import TwoPlayerGuessIt
-
-    t = TicTacToe()
-    gi = TwoPlayerGuessIt()
-
-    model = MiniVGG
-    game = t
-
-    nn = NeuralNetwork(game, model, num_updates=100, weight_decay=1e-4)
-    pi = Trainer(game=game, nn=nn, simulations=15, cpuct=3)
-    iteration = 0
-    for _ in range(10000):
-        for _ in range(10):
-            pi.policy_iteration()
-            iteration += 1
-        
-        nn.save(name=iteration)
-        #pi.evaluate_against_uninformed(1000)
-        pi.evaluate_against_uninformed(15)
-        pi.evaluate_against_uninformed(100)
-        pi.evaluate_against_uninformed(500)
-        pi.evaluate_against_uninformed(1000)
-
-        #pi.evaluate_against_uninformed(10000)
-
-        
-
-        template = np.zeros_like(game.get_available_actions(game.get_initial_state()))
-        template[0,0] = 1
-        second = game.take_action(game.get_initial_state(), template)
-        pred = nn.predict(second)
-        print(pred[0][3], nn.latest_loss, len(pi.training_data))
-        
-
-
 

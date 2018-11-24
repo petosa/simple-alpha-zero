@@ -8,8 +8,8 @@ from model import Model
 
 class MLP(Model):
 
-  def __init__(self, input_shape, output_shape, **kwargs):
-    super(MLP, self).__init__(input_shape, output_shape, *kwargs)
+  def __init__(self, input_shape, output_shape):
+    super(MLP, self).__init__(input_shape, output_shape)
     num_hidden_units = 200
     self.input_shape = input_shape
     self.output_shape = output_shape
