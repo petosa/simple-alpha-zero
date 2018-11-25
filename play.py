@@ -26,6 +26,7 @@ if __name__ == "__main__":
     from neural_network import NeuralNetwork
     from models.mlp import MLP
     from models.minivgg import MiniVGG
+    from models.smallvgg import SmallVGG
 
     t = TicTacToe()
     gi1 = OnePlayerGuessIt()
@@ -66,8 +67,8 @@ if __name__ == "__main__":
     #h1, u1, u2 = HumanPlayer(lf3), UninformedMCTSPlayer(llf3, 10), UninformedMCTSPlayer(lf3, 10)
     #r = play_match(lf3, [h1, u1, u2], verbose=True)
 
-    h1, u1= HumanPlayer(c4), UninformedMCTSPlayer(c4, 100)
-    r = play_match(c4, [h1, u1], verbose=True)
+    #h1, u1= HumanPlayer(c4), UninformedMCTSPlayer(c4, 50)
+    #r = play_match(c4, [u1, h1], verbose=True)
 
     #######################
     # Human v DMCTS games #
@@ -78,12 +79,17 @@ if __name__ == "__main__":
     #h1, d1 = HumanPlayer(t), DeepMCTSPlayer(t, nn, 15)
     #r = play_match(t, [h1, d1], verbose=True)
 
+    nn = NeuralNetwork(c4, SmallVGG)
+    nn.load("1140")
+    h1, d1 = HumanPlayer(c4), DeepMCTSPlayer(c4, nn, 50)
+    r = play_match(c4, [d1, h1], verbose=True)
+
 
     #######################
     # UMCTS v UMCTS games #
     #######################
 
-    #h1, h2 = UninformedMCTSPlayer(c4, 100), UninformedMCTSPlayer(c4, 500)
+    #h1, h2 = UninformedMCTSPlayer(c4, 50), UninformedMCTSPlayer(c4, 1000)
     #r = play_match(c4, [h1, h2], verbose=True)
 
     '''
