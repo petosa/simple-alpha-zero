@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head>  
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="utf-8">
+  <title>Deep Learning Class Project
+  | Georgia Institute of Technology | Fall 2018: CS 4803 / 7643</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+<!-- Le styles -->  
+  <link href="css/bootstrap.css" rel="stylesheet">
+<style>
+body {
+padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+}
+.vis {
+color: #3366CC;
+}
+.data {
+color: #FF9900;
+}
+</style>
+  
+<link href="css/bootstrap-responsive.min.css" rel="stylesheet">
+</head>
+
+<body>
+<div class="container">
+<div class="page-header">
+
+<!-- Title and Name --> 
+<h1>AlphaZero</h1> 
+<span style="font-size: 20px; line-height: 1.5em;"><strong>Nick Petosa, Robert Keezer, Nupur Chatterji </strong></span><br>
+<span style="font-size: 18px; line-height: 1.5em;">Fall 2018 CS 4803 / 7643 Deep Learning: Class Project</span><br>
+<span style="font-size: 18px; line-height: 1.5em;">Georgia Institute of Technology</span>
+<hr>
+
+<div style="text-align: center;">
+<!-- SOURCE: https://www.ocf.berkeley.edu/~yosenl/extras/alphabeta/alphabeta.jpg -->
+<img style="height: 200px;" alt="" src="images/ttt.png">
+</div>
+
+<!-- Goal -->
+<h2>Abstract</h2>
+<!-- 
+One or two sentences on the motivation behind the problem you are solving. 
+One or two sentences describing the approach you took. 
+One or two sentences on the main result you obtained. -->
+
+<p> We were inspired by the work done by DeepMind on AlphaZero - an algorithm developed to play games by simply using the rules of the game, without any prior knowledge or example expert-played games. The AlphaZero algorithm is a generalization of the AlphaGo Zero algorithm (used specifically for the game of Go), which uses a combination of deep neural networks and reinforcement learning. </p>
+
+<p> AlphaZero leverages the Monte-Carlo Tree Search (MCTS) algorithm in order to traverse through various possible game states. As part of our project, we opted to mimic this approach, and test it on smaller games such as Tic-Tac-Toe and Connect 4. We wanted to see if we could: GOAL -- get same results, improve existing results? </p>
+
+<p> TO DO: MAIN RESULTS. </p>
+
+<br><br>
+<!-- Main Illustrative Figure --> 
+<div style="text-align: center;">
+<!-- SOURCE: https://www.google.com/url?sa=i&source=images&cd=&cad=rja&uact=8&ved=2ahUKEwj95M6DsvDeAhXpQd8KHWFCDv0QjRx6BAgBEAU&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMonte_Carlo_tree_search&psig=AOvVaw0x_Q2shAPS29D3Pj6xeL0A&ust=1543264316465916 -->
+<img style="height: 200px;" alt="" src="images/mcts.png">
+</div>
+
+<br><br>
+<!-- Introduction -->
+<h2> Introduction / Background / Motivation </h2>
+<h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
+<p>Our goal was to independently replicate the implementation of AlphaZero and test it out on games such as Tic-Tac-Toe and Connect-4. Since the algorithm is generalized, the same algorithm could be plugged into any game scenario, and should be able to perform. Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based on solely its associated rules. We would not provide the algorithm with any other information such as game trajectories by grandmasters etc.</p>
+
+<h4>How is it done today, and what are the limits of current practice?</h4>
+<p>Currently, AlphaZero is at the forefront of systems that can learn by itself and master highly complex games. Stockfish has also been known to dabble in this field, but their results have not been as impressive as AlphaZero. In fact, in a match of 100 games, AlphaZero beat Stockfish 64-36, a landslide victory. AlphaZero's key benefit lies in the fact that it does not require masses of data and can self-learn how to play the game. Combined with the increase in computational power now available, training the network to play a game of choice has almost become straightforward. </p>
+
+<h4>Who cares? If you are successful, what difference will it make?</h4>
+Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+
+<br><br>
+<!-- Approach -->
+<h2>Approach</h2>
+<h4>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</h4>
+Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+
+<h4>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</h4>
+Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+
+<br><br>
+<!-- Results -->
+<h2>Experiments and Results</h2>
+<h4>How did you measure success? What experiments were used? What were the results, both quantitative and qualitative? Did you succeed? Did you fail? Why?</h4>
+Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
+
+<br><br>
+
+<!-- Main Results Figure --> 
+<div style="text-align: center;">
+<img style="height: 300px;" alt="" src="images/alphazero.png">
+</div>
+<br><br>
+
+  <hr>
+  <footer> 
+  <p>© Nick Petosa, Robert Keezer, Nupur Chatterji </p>
+  <p>This webpage template is based on a similar template from Dr. Devi Parikh's
+  <a href="https://samyak-268.github.io/F18CS4476/">Intro to Computer Vision course</a>.</p>
+  </footer>
+</div>
+</div>
+
+<br><br>
+
+</body></html>
