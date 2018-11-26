@@ -8,7 +8,7 @@ import time
 
 class Trainer:
 
-    def __init__(self, game, nn, num_simulations,  num_games, num_updates, cpuct=1, num_threads=4):
+    def __init__(self, game, nn, num_simulations,  num_games, num_updates, cpuct, num_threads):
         self.game = game
         self.nn = nn
         self.num_simulations = num_simulations
@@ -17,6 +17,8 @@ class Trainer:
         self.training_data = np.zeros((0,3))
         self.cpuct = cpuct
         self.num_threads = num_threads
+        self.error_log = []
+
 
     # Does one game of self play and generates training samples
     def self_play(self, temperature):
@@ -67,7 +69,7 @@ class Trainer:
 
         if verbose:
             print("SIMULATING " + str(self.num_games) + " games")
-            start = time.time()
+            start = time.clock()
         if self.num_threads > 1:
             jobs = [temperature]*self.num_games
             pool = ThreadPool(self.num_threads) 
@@ -80,28 +82,33 @@ class Trainer:
                 new_data = self.self_play(temperature)
                 self.training_data = np.concatenate([self.training_data, new_data], axis=0)
         if verbose:
-            print(str(int(time.time()-start)) + " seconds")
+            print("Simulating took " + str(int(time.clock()-start)) + " seconds")
 
 
         # self.training_data = self.training_data[-200000:,:]
         if verbose:
             print("TRAINING")
-            start = time.time()
-        for i in range(self.num_updates):
+            start = time.clock()
+        mean_loss = None
+        count = 0
+        for _ in range(self.num_updates):
             self.nn.train(self.training_data)
-            if verbose:
-                if i % 10 == 0:
-                    print(self.nn.latest_loss)
+            new_loss = self.nn.latest_loss.item()
+            if mean_loss is None:
+                mean_loss = new_loss
+            else:
+                (mean_loss*count + new_loss)/(count+1)
+            count += 1
+        self.error_log.append(mean_loss)
+
         if verbose:
-            print(str(int(time.time()-start)) + " seconds")
+            print("Training took " + str(int(time.clock()-start)) + " seconds")
+            print("Average train error:", mean_loss)
 
 
-    def evaluate_against_uninformed(self, uninformed_simulations):
+    def evaluate_against_uninformed(self, uninformed_simulations, num_opponents):
         uninformed= UninformedMCTSPlayer(self.game, uninformed_simulations)
         informed = DeepMCTSPlayer(self.game, self.nn, self.num_simulations)
-        first = play_match(self.game, [informed, uninformed])
-        first = ["Win", "Lose", "Tie"][first]
-        second = play_match(self.game, [uninformed, informed])
-        second = ["Lose", "Win", "Tie"][second]
-        print("Opponent strength: {}     When I play first: {}     When I play second: {}".format(uninformed_simulations,first, second))
+        score = play_match(self.game, [informed] + [uninformed]*num_opponents, permute=True)[informed]
+        print("Opponent strength: {}     My score: {}".format(uninformed_simulations,score))
 

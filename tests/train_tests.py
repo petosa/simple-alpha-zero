@@ -19,7 +19,7 @@ class TrainTests(unittest.TestCase):
         gi = TwoPlayerGuessIt()
         nn = NeuralNetwork(gi, DumbNet)
 
-        t = Trainer(gi, nn, num_simulations=2, num_games=1, num_updates=0)
+        t = Trainer(gi, nn, num_simulations=2, num_games=1, num_updates=0, cpuct=1, num_threads=1)
         data = t.self_play(temperature=0)
 
         np.testing.assert_equal(data[:,-1], np.array([-1, 1, -1, 1]))
@@ -41,7 +41,7 @@ class TrainTests(unittest.TestCase):
         ttt = TicTacToe()
         nn = NeuralNetwork(ttt, PriorNet)
 
-        t = Trainer(ttt, nn, num_simulations=2, num_games=1, num_updates=0)
+        t = Trainer(ttt, nn, num_simulations=2, num_games=1, num_updates=0, cpuct=1, num_threads=4)
         data = t.self_play(temperature=0)
 
         np.testing.assert_equal(data[:,-1], np.array([1, -1, 1, -1, 1, -1, 1]))
@@ -73,7 +73,7 @@ class TrainTests(unittest.TestCase):
         llf = ThreePlayerLinearLeapFrog()
         nn = NeuralNetwork(llf, DumbNet)
 
-        t = Trainer(llf, nn, num_simulations=2, num_games=1, num_updates=0)
+        t = Trainer(llf, nn, num_simulations=2, num_games=1, num_updates=0, cpuct=1, num_threads=1)
         data = t.self_play(temperature=0)
         np.testing.assert_equal(data[:,-1], np.array([-1, 1, -1, -1, 1]))
 
@@ -83,7 +83,7 @@ class TrainTests(unittest.TestCase):
         nn = NeuralNetwork(ttt, PriorNet)
 
         loops = 100
-        t = Trainer(ttt, nn, num_simulations=2, num_games=loops, num_updates=0)
+        t = Trainer(ttt, nn, num_simulations=2, num_games=loops, num_updates=0, cpuct=1, num_threads=4)
         t.policy_iteration()
         states = t.training_data[:,0]
         inits = 0
