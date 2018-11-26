@@ -68,7 +68,7 @@ connect4_config_cuda = {
 
 # Please select your config
 #################################
-config = tictactoe_config
+config = connect4_config_cuda
 #################################
 
 # Instantiate
