@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 import os
-import torch.backends.cudnn as cudnn
 
 class NeuralNetwork():
 
