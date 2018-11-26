@@ -89,8 +89,9 @@ class Trainer:
             start = time.time()
         for i in range(self.num_updates):
             self.nn.train(self.training_data)
-            if i % 1 == 0:
-                print(self.nn.latest_loss)
+            if verbose:
+                if i % 10 == 0:
+                    print(self.nn.latest_loss)
         if verbose:
             print(str(int(time.time()-start)) + " seconds")
 
