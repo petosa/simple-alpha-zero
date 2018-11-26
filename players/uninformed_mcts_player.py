@@ -11,7 +11,7 @@ class UninformedMCTSPlayer(Player):
     def __init__(self, game, simulations):
         self.game = game
         self.simulations = simulations
-        nn = NeuralNetwork(game, DumbNet)
+        nn = NeuralNetwork(game, DumbNet, cuda=False)
         self.tree = MCTS(game, nn)
 
     def update_state(self, s):

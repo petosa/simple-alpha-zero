@@ -2,11 +2,16 @@ import numpy as np
 from models.mlp import MLP
 from models.minivgg import MiniVGG
 from models.smallvgg import SmallVGG
+from models.bigvgg import BigVGG
+from models.resnet import ResNet
+from models.senet import SENet
 from games.tictactoe import TicTacToe
 from games.connect4 import Connect4
 from games.guessit import TwoPlayerGuessIt
 from neural_network import NeuralNetwork
 from train import Trainer
+import torch
+import time
 
 
 tictactoe_config = {
@@ -34,7 +39,7 @@ connect4_config = {
     "cpuct": 3,
     "num_simulations": 50,
     "batch_size": 64,
-    "num_threads": 2
+    "num_threads": 1
 }
 
 # Please select your config
@@ -45,24 +50,30 @@ config = connect4_config
 # Instantiate
 game = config["game"]()
 nn = NeuralNetwork(game=game, model_class=config["model"], lr=config["lr"],
-    weight_decay=config["weight_decay"], batch_size=config["batch_size"])
+    weight_decay=config["weight_decay"], batch_size=config["batch_size"], cuda=False)
 pi = Trainer(game=game, nn=nn, num_simulations=config["num_simulations"],
 num_games=config["num_games"], num_updates=config["num_updates"], cpuct=config["cpuct"],
 num_threads=config["num_threads"])
 
 # Training loop
 iteration = 0
+verbose = False
 while True:
     for _ in range(config["ckpt_frequency"]):
-        pi.policy_iteration() # One iteration of PI
+        pi.policy_iteration(verbose=verbose) # One iteration of PI
         iteration += 1
+        if verbose:
+            print(nn.latest_loss, len(pi.training_data))
     
     nn.save(name=iteration)
-    pi.evaluate_against_uninformed(15)
-    pi.evaluate_against_uninformed(100)
-    pi.evaluate_against_uninformed(500)
-    pi.evaluate_against_uninformed(1000)
-    #pi.evaluate_against_uninformed(10000)
+    pi.evaluate_against_uninformed(10)
+    pi.evaluate_against_uninformed(20)
+    pi.evaluate_against_uninformed(40)
+    pi.evaluate_against_uninformed(80)
+    pi.evaluate_against_uninformed(160)
+    pi.evaluate_against_uninformed(320)
+    pi.evaluate_against_uninformed(640)
+    pi.evaluate_against_uninformed(1280)
 
     # Report statistics
     print(nn.latest_loss, len(pi.training_data))
