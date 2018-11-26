@@ -10,8 +10,6 @@ from games.connect4 import Connect4
 from games.guessit import TwoPlayerGuessIt
 from neural_network import NeuralNetwork
 from train import Trainer
-import torch
-import time
 
 
 tictactoe_config = {
