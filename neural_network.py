@@ -2,15 +2,18 @@ import torch
 import numpy as np
 import os
 
-
 class NeuralNetwork():
 
-    def __init__(self, game, model_class, lr=1e-3, weight_decay=1e-8, batch_size=64):
+    def __init__(self, game, model_class, lr=1e-3, weight_decay=1e-8, batch_size=64, cuda=False):
         self.game = game
         self.batch_size = batch_size
         input_shape = game.get_initial_state().shape
         p_shape = game.get_available_actions(game.get_initial_state()).shape
         self.model = model_class(input_shape, p_shape)
+        self.cuda = cuda
+        if self.cuda:
+            self.model = self.model.to('cuda')
+            self.model = torch.nn.DataParallel(self.model)
         if len(list(self.model.parameters())) > 0:
             self.optimizer = torch.optim.Adam(self.model.parameters(), lr=lr, weight_decay=weight_decay)
 
@@ -26,6 +29,8 @@ class NeuralNetwork():
         p_pred, v_pred = self.model(x)
         v_pred = v_pred.view(-1)
         p_gt, v_gt = batch[:,1], torch.from_numpy(batch[:,2].astype(np.float32))
+        if self.cuda:
+            v_gt = v_gt.cuda()
         loss = self.loss(states, (p_pred, v_pred), (p_gt, v_gt))
         self.optimizer.zero_grad()
         loss.backward()
@@ -39,7 +44,7 @@ class NeuralNetwork():
         with torch.no_grad():
             input_s = torch.from_numpy(input_s)
             p_logits, v = self.model(input_s)
-            p, v = self.get_valid_dist(s, p_logits[0]).numpy().squeeze(), v.numpy().reshape(-1)[0] # EXP because log softmax
+            p, v = self.get_valid_dist(s, p_logits[0]).cpu().numpy().squeeze(), v.cpu().numpy().reshape(-1)[0] # EXP because log softmax
         return p, v
 
 
@@ -55,6 +60,8 @@ class NeuralNetwork():
         p_loss = 0
         for i in range(batch_size):
             gt = torch.from_numpy(p_gt[i].astype(np.float32))
+            if self.cuda:
+                gt = gt.cuda()
             s = states[i]
             logits = p_pred[i]
             pred = self.get_valid_dist(s, logits, log_softmax=True)
@@ -67,6 +74,8 @@ class NeuralNetwork():
     # Takes one state and logit set as input, produces a softmax/log_softmax over the valid actions.
     def get_valid_dist(self, s, logits, log_softmax=False):
         mask = torch.from_numpy(self.game.get_available_actions(s).astype(np.uint8))
+        if self.cuda:
+            mask = mask.cuda()
         selection = torch.masked_select(logits, mask)
         dist = torch.nn.functional.log_softmax(selection, dim=-1)
         if log_softmax:
