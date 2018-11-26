@@ -46,8 +46,9 @@ class Connect4(Game):
     # Print a human-friendly visualization of the board.
     def friendly_print(self, s):
         board = np.ones((6,7)).astype(np.object)
-        board[:,:] = " "
+        board[:,:] = "_"
         board[s[:,:,0] == 1] = 'x'
         board[s[:,:,1] == 1] = 'o'
-        print(board)
+        last_line = np.array([str(x) for x in np.arange(7)])
+        print(np.concatenate([board, last_line.reshape(1,-1)], axis=0))
 

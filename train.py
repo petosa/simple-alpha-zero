@@ -8,7 +8,7 @@ import time
 
 class Trainer:
 
-    def __init__(self, game, nn, num_simulations,  num_games, num_updates, cpuct=1, num_threads=4):
+    def __init__(self, game, nn, num_simulations,  num_games, num_updates, cpuct, num_threads):
         self.game = game
         self.nn = nn
         self.num_simulations = num_simulations
@@ -96,12 +96,9 @@ class Trainer:
             print(str(int(time.time()-start)) + " seconds")
 
 
-    def evaluate_against_uninformed(self, uninformed_simulations):
+    def evaluate_against_uninformed(self, uninformed_simulations, num_opponents):
         uninformed= UninformedMCTSPlayer(self.game, uninformed_simulations)
         informed = DeepMCTSPlayer(self.game, self.nn, self.num_simulations)
-        first = play_match(self.game, [informed, uninformed])
-        first = ["Win", "Lose", "Tie"][first]
-        second = play_match(self.game, [uninformed, informed])
-        second = ["Lose", "Win", "Tie"][second]
-        print("Opponent strength: {}     When I play first: {}     When I play second: {}".format(uninformed_simulations,first, second))
+        score = play_match(self.game, [informed] + [uninformed]*num_opponents, permute=True)[informed]
+        print("Opponent strength: {}     My score: {}".format(uninformed_simulations,score))
 

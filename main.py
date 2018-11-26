@@ -25,7 +25,8 @@ tictactoe_config = {
     "batch_size": 64,
     "num_threads": 4,
     "cuda": False,
-    "verbose": False
+    "verbose": False,
+    "num_opponents": 1,
 }
 
 connect4_config = {
@@ -41,7 +42,8 @@ connect4_config = {
     "batch_size": 64,
     "num_threads": 2,
     "cuda": False,
-    "verbose": False
+    "verbose": False,
+    "num_opponents": 1,
 }
 
 connect4_config_cuda = {
@@ -57,12 +59,13 @@ connect4_config_cuda = {
     "batch_size": 64,
     "num_threads": 1,
     "cuda": True,
-    "verbose": False
+    "verbose": False,
+    "num_opponents": 1,
 }
 
 # Please select your config
 #################################
-config = connect4_config
+config = tictactoe_config
 #################################
 
 # Instantiate
@@ -83,11 +86,11 @@ while True:
             print(nn.latest_loss, len(pi.training_data))
     
     nn.save(name=iteration)
-    pi.evaluate_against_uninformed(10)
-    pi.evaluate_against_uninformed(20)
-    pi.evaluate_against_uninformed(40)
-    pi.evaluate_against_uninformed(80)
-    pi.evaluate_against_uninformed(160)
-    pi.evaluate_against_uninformed(320)
-    pi.evaluate_against_uninformed(640)
-    pi.evaluate_against_uninformed(1280)
+    pi.evaluate_against_uninformed(10, config["num_opponents"])
+    pi.evaluate_against_uninformed(20, config["num_opponents"])
+    pi.evaluate_against_uninformed(40, config["num_opponents"])
+    pi.evaluate_against_uninformed(80, config["num_opponents"])
+    pi.evaluate_against_uninformed(160, config["num_opponents"])
+    pi.evaluate_against_uninformed(320, config["num_opponents"])
+    pi.evaluate_against_uninformed(640, config["num_opponents"])
+    pi.evaluate_against_uninformed(1280, config["num_opponents"])
