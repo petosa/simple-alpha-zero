@@ -51,7 +51,7 @@ connect4_config_cuda = {
     "model": SENet,
     "ckpt_frequency": 5,
     "num_updates": 100,
-    "num_games": 10,
+    "num_games": 30,
     "weight_decay": 1e-4,
     "lr": 1e-6,
     "cpuct": 3,
@@ -64,7 +64,7 @@ connect4_config_cuda = {
 
 # Please select your config
 #################################
-config = connect4_config_cuda
+config = connect4_config
 #################################
 
 # Instantiate
