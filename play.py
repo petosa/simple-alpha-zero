@@ -40,11 +40,11 @@ if __name__ == "__main__":
     from games.tictactoe import TicTacToe
 
     game = TicTacToe()
-    ckpt = 470
+    ckpt = 840
     choices = [
         HumanPlayer(game),
         UninformedMCTSPlayer(game, simulations=1000),
-        DeepMCTSPlayer(game, NeuralNetwork(game, MiniVGG), simulations=40)
+        DeepMCTSPlayer(game, NeuralNetwork(game, MiniVGG), simulations=50)
     ]
     choices[-1].tree.nn.load(ckpt)
     players = [choices[0], choices[2]]
