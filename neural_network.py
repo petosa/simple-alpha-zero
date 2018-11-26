@@ -86,20 +86,26 @@ class NeuralNetwork():
         directory = "checkpoints/{}-{}".format(self.game.__class__.__name__, self.model.__class__.__name__)
         if not os.path.exists(directory):
             os.makedirs(directory)
-        path = "{}/{}.ckpt".format(directory, name)
+        network_path = "{}/{}.ckpt".format(directory, name)
+        data_path = "{}/training.data".format(directory)
         torch.save({
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
-            'training_data': training_data,
             'error_log': error_log,
-            }, path)
+            }, network_path)
+        torch.save({
+            'training_data': training_data,
+            }, data_path)
 
     def load(self, name):
-        path = "checkpoints/{}-{}/{}.ckpt".format(self.game.__class__.__name__, self.model.__class__.__name__, name)
-        checkpoint = torch.load(path)
-        self.model.load_state_dict(checkpoint['model_state_dict'])
-        self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        return checkpoint['training_data'], checkpoint['error_log']
+        directory = "checkpoints/{}-{}".format(self.game.__class__.__name__, self.model.__class__.__name__)
+        network_path = "{}/{}.ckpt".format(directory, name)
+        data_path = "{}/training.data".format(directory)
+        network_checkpoint = torch.load(network_path)
+        self.model.load_state_dict(network_checkpoint['model_state_dict'])
+        self.optimizer.load_state_dict(network_checkpoint['optimizer_state_dict'])
+        data_checkpoint = torch.load(data_path)
+        return data_checkpoint['training_data'], network_checkpoint['error_log']
 
     def list_checkpoints(self):
         path = "checkpoints/{}-{}/".format(self.game.__class__.__name__, self.model.__class__.__name__)
