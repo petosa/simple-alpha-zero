@@ -5,7 +5,7 @@ import torch.backends.cudnn as cudnn
 
 class NeuralNetwork():
 
-    def __init__(self, game, model_class, lr=1e-3, weight_decay=1e-8, batch_size=64, cuda=True):
+    def __init__(self, game, model_class, lr=1e-3, weight_decay=1e-8, batch_size=64, cuda=False):
         self.game = game
         self.batch_size = batch_size
         input_shape = game.get_initial_state().shape
@@ -45,7 +45,7 @@ class NeuralNetwork():
         with torch.no_grad():
             input_s = torch.from_numpy(input_s)
             p_logits, v = self.model(input_s)
-            p, v = self.get_valid_dist(s, p_logits[0]).squeeze(), v.reshape(-1)[0] # EXP because log softmax
+            p, v = self.get_valid_dist(s, p_logits[0]).cpu().numpy().squeeze(), v.cpu().numpy().reshape(-1)[0] # EXP because log softmax
         return p, v
 
 
