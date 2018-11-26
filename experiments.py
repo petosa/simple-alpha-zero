@@ -89,10 +89,10 @@ def effective_model_power(checkpoint, game, model_class, sims):
 
 
 if __name__ == "__main__":
-    checkpoint = 1810
-    game = Connect4()
-    model_class = SmallVGG
-    sims = 100
+    checkpoint = 340
+    game = TicTacToe()
+    model_class = MiniVGG
+    sims = 15
     
     #rank_checkpoints(game, model_class, sims)
     #one_vs_all(checkpoint, game, model_class, sims)

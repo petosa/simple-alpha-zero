@@ -39,14 +39,14 @@ if __name__ == "__main__":
     from games.connect4 import Connect4
     from games.tictactoe import TicTacToe
 
-    game = Connect4()
-    ckpt = 1800
+    game = TicTacToe()
+    ckpt = 470
     choices = [
         HumanPlayer(game),
         UninformedMCTSPlayer(game, simulations=1000),
-        DeepMCTSPlayer(game, NeuralNetwork(game, SmallVGG), simulations=800)
+        DeepMCTSPlayer(game, NeuralNetwork(game, MiniVGG), simulations=40)
     ]
     choices[-1].tree.nn.load(ckpt)
-    players = [choices[2], choices[0]]
-    play_match(game, players, verbose=True)
+    players = [choices[0], choices[2]]
+    print(play_match(game, players, verbose=True))
     

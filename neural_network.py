@@ -82,7 +82,7 @@ class NeuralNetwork():
             return dist
         return torch.exp(dist)
 
-    def save(self, name):
+    def save(self, name, training_data, error_log):
         directory = "checkpoints/{}-{}".format(self.game.__class__.__name__, self.model.__class__.__name__)
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -90,6 +90,8 @@ class NeuralNetwork():
         torch.save({
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
+            'training_data': training_data,
+            'error_log': error_log,
             }, path)
 
     def load(self, name):
@@ -97,3 +99,11 @@ class NeuralNetwork():
         checkpoint = torch.load(path)
         self.model.load_state_dict(checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+        return checkpoint['training_data'], checkpoint['error_log']
+
+    def list_checkpoints(self):
+        path = "checkpoints/{}-{}/".format(self.game.__class__.__name__, self.model.__class__.__name__)
+        if  not os.path.isdir(path):
+            return []
+        return sorted([int(filename.split(".ckpt")[0]) for filename in os.listdir(path) if filename.endswith(".ckpt")])
+
