@@ -25,7 +25,7 @@ def rank_checkpoints(game, model_class, sims):
         winning_player = DeepMCTSPlayer(game, winning_model, sims)
         contending_player = DeepMCTSPlayer(game, contending_model, sims)
         outcome = play_match(game, [contending_player, winning_player], verbose=False, permute=True)[contending_player]
-        if outcome >= 0:
+        if outcome > 0:
             current_winner = contender
         print("Current Champion:", current_winner, "Challenger:", contender, "Outcome:", outcome)
 
@@ -89,11 +89,12 @@ def effective_model_power(checkpoint, game, model_class, sims):
 
 
 if __name__ == "__main__":
-    checkpoint = 340
+    checkpoint = 210
     game = TicTacToe()
     model_class = MiniVGG
-    sims = 15
+    sims = 50
     
-    #rank_checkpoints(game, model_class, sims)
+    rank_checkpoints(game, model_class, sims)
     #one_vs_all(checkpoint, game, model_class, sims)
-    effective_model_power(checkpoint, game, model_class, sims)
+    #effective_model_power(checkpoint, game, model_class, sims)
+    

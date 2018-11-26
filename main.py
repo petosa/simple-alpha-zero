@@ -15,19 +15,19 @@ from train import Trainer
 tictactoe_config = {
     "game": TicTacToe,
     "model": MiniVGG,
-    "ckpt_frequency": 10,
-    "num_updates": 100,
+    "ckpt_frequency": 1,
+    "num_updates": 1000,
     "num_games": 30,
     "weight_decay": 1e-4,
     "lr": 1e-3,
     "cpuct": 3,
-    "num_simulations": 15,
+    "num_simulations": 50,
     "batch_size": 64,
     "num_threads": 4,
     "cuda": False,
     "verbose": True,
     "num_opponents": 1,
-    "resume": True,
+    "resume": False,
 }
 
 connect4_config = {
@@ -86,7 +86,7 @@ if config["resume"]:
         print("No existing checkpoints to resume.")
         quit()
     iteration = checkpoints[-1]
-    pi.training_data, pi.error_log = nn.load(iteration)
+    pi.training_data, pi.error_log = nn.load(iteration, load_supplementary_data=True)
 else:
     if len(checkpoints) != 0:
         print("Please delete the existing checkpoints for this game+model combination, or change resume flag to True.")
