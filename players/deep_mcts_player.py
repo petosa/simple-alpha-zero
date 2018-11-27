@@ -9,6 +9,7 @@ class DeepMCTSPlayer(Player):
     def __init__(self, game, nn, simulations):
         self.game = game
         self.simulations = simulations
+        self.nn = nn
         self.tree = MCTS(game, nn)
 
     def update_state(self, s):
@@ -22,3 +23,6 @@ class DeepMCTSPlayer(Player):
         template[a] = 1
         s_prime = self.game.take_action(s, template)
         return s_prime
+
+    def reset(self):
+        self.tree = MCTS(self.game, self.nn)

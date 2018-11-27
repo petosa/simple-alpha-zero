@@ -20,6 +20,10 @@ class Game:
     def get_player(self, s):
         raise NotImplementedError()
 
+    # The number of players for this game
+    def get_num_players(self):
+        raise NotImplementedError()
+
     # Visualizes the given state.
     def friendly_print(self, s):
         raise NotImplementedError()

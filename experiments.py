@@ -2,9 +2,11 @@
 import os
 from models.smallvgg import SmallVGG
 from models.minivgg import MiniVGG
+from models.mlp import MLP
 from neural_network import NeuralNetwork
 from games.connect4 import Connect4
 from games.tictactoe import TicTacToe
+from games.leapfrog import ThreePlayerLeapFrog
 from players.deep_mcts_player import DeepMCTSPlayer
 from players.uninformed_mcts_player import UninformedMCTSPlayer
 from play import play_match
@@ -15,19 +17,25 @@ from play import play_match
 def rank_checkpoints(game, model_class, sims):
     winning_model = NeuralNetwork(game, model_class)
     contending_model = NeuralNetwork(game, model_class)
-    path = "checkpoints/{}-{}/".format(game.__class__.__name__, model_class.__name__)
-    ckpts = sorted([int(filename.split(".ckpt")[0]) for filename in os.listdir(path) if filename.endswith(".ckpt")])
+    ckpts = winning_model.list_checkpoints()
+    num_opponents = game.get_num_players() - 1
     current_winner = ckpts[0]
 
     for contender in ckpts:
-        winning_model.load(current_winner)
+
+        # Load contending player
         contending_model.load(contender)
-        winning_player = DeepMCTSPlayer(game, winning_model, sims)
         contending_player = DeepMCTSPlayer(game, contending_model, sims)
-        outcome = play_match(game, [contending_player, winning_player], verbose=False, permute=True)[contending_player]
-        if outcome > 0:
+
+        # Load winning player
+        winning_model.load(current_winner)
+        winners = [DeepMCTSPlayer(game, winning_model, sims) for _ in range(num_opponents)]
+        
+        scores, outcomes = play_match(game, [contending_player] + winners, verbose=False, permute=True)
+        score, outcome = scores[contending_player], outcomes[contending_player]
+        if outcome == "Win":
             current_winner = contender
-        print("Current Champion:", current_winner, "Challenger:", contender, "Outcome:", outcome)
+        print("Current Champion:", current_winner, "Challenger:", contender, "Outcome:", outcome, score)
 
 
 # Plays the given checkpoint against all other checkpoints and logs upsets.
@@ -35,66 +43,54 @@ def one_vs_all(checkpoint, game, model_class, sims):
     my_model = NeuralNetwork(game, model_class)
     my_model.load(checkpoint)
     contending_model = NeuralNetwork(game, model_class)
-    path = "checkpoints/{}-{}/".format(game.__class__.__name__, model_class.__name__)
-    ckpts = sorted([int(filename.split(".ckpt")[0]) for filename in os.listdir(path) if filename.endswith(".ckpt")])
+    ckpts = my_model.list_checkpoints()
+    num_opponents = game.get_num_players() - 1
 
     for contender in ckpts:
         contending_model.load(contender)
         my_player = DeepMCTSPlayer(game, my_model, sims)
-        contending_player = DeepMCTSPlayer(game, contending_model, sims)
-        outcome = play_match(game, [my_player, contending_player], verbose=False, permute=True)[my_player]
-
-        if outcome < 0:
-            print("LOSE", contender, outcome)
-        elif outcome == 0:
-            print("TIE", contender, outcome)
-        else:
-            print("WIN", contender, outcome)
+        contenders = [DeepMCTSPlayer(game, contending_model, sims) for _ in range(num_opponents)]
+        scores, outcomes = play_match(game, [my_player] + contenders, verbose=False, permute=True)
+        score, outcome = scores[my_player], outcomes[my_player]
+        print("Challenger:", contender, "Outcome:", outcome, score)
 
 
 # Finds the effective MCTS strength of a checkpoint
 # Also presents a control at each checkpoint - that is, the result
-# if you had used no heuristic but the same power.
+# if you had used no heuristic but the same num_simulations.
 def effective_model_power(checkpoint, game, model_class, sims):
     my_model = NeuralNetwork(game, model_class)
     my_model.load(checkpoint)
     my_player = DeepMCTSPlayer(game, my_model, sims)
     strength = 10
+    num_opponents = game.get_num_players() - 1
     lost = False
 
     while not lost: 
+        contenders = [UninformedMCTSPlayer(game, strength) for _ in range(num_opponents)]
 
         # Play main game
-        contending_player = UninformedMCTSPlayer(game, strength)
-        main = play_match(game, [my_player, contending_player], verbose=False, permute=True)[my_player]
-        if main < 0:
-            print("LOSE", strength, end=" ")
+        scores, outcomes = play_match(game, [my_player] + contenders, verbose=False, permute=True)
+        score, outcome = scores[my_player], outcomes[my_player]
+        if outcome == "Lose":
             lost = True
-        elif main == 0:
-            print("TIE", strength, end=" ")
-        else:
-            print("WIN", strength, end=" ")
+        print("{} <{}>      Opponent strength: {}".format(outcome, round(score, 3), strength), end="")
 
         # Play control game
         control_player = UninformedMCTSPlayer(game, sims)
-        control = play_match(game, [control_player, contending_player], verbose=False, permute=True)[control_player]
-        if control < 0:
-            print("(Control: LOSE)")
-        elif control == 0:
-            print("(Control: TIE)")
-        else:
-            print("(Control: WIN)")
+        scores, outcomes = play_match(game, [control_player] + contenders, verbose=False, permute=True)
+        score, outcome = scores[control_player], outcomes[control_player]
+        print("      (Control: {} <{}>)".format(outcome, round(score, 3)))
 
-        strength *= 2
+        strength *= 2 # Opponent strength doubles every turn
 
 
 if __name__ == "__main__":
-    checkpoint = 210
+    checkpoint = 76
     game = TicTacToe()
     model_class = MiniVGG
     sims = 50
     
-    rank_checkpoints(game, model_class, sims)
+    #rank_checkpoints(game, model_class, sims)
     #one_vs_all(checkpoint, game, model_class, sims)
-    #effective_model_power(checkpoint, game, model_class, sims)
-    
+    effective_model_power(checkpoint, game, model_class, sims)

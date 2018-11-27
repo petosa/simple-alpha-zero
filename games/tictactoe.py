@@ -34,6 +34,9 @@ class TicTacToe(Game):
     def get_player(self, s):
         return int(s[0,0,2])
 
+    def get_num_players(self):
+        return 2
+
     # Print a human-friendly visualization of the board.
     def friendly_print(self, s):
         board = np.ones((3,3)).astype(np.object)
