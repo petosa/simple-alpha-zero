@@ -3,6 +3,7 @@ import os
 from models.smallvgg import SmallVGG
 from models.minivgg import MiniVGG
 from models.mlp import MLP
+from models.senet import SENet
 from neural_network import NeuralNetwork
 from games.connect4 import Connect4
 from games.tictactoe import TicTacToe
@@ -14,9 +15,9 @@ from play import play_match
 
 
 # Tracks the current best checkpoint across all checkpoints
-def rank_checkpoints(game, model_class, sims):
-    winning_model = NeuralNetwork(game, model_class)
-    contending_model = NeuralNetwork(game, model_class)
+def rank_checkpoints(game, model_class, sims, cuda=False):
+    winning_model = NeuralNetwork(game, model_class, cuda=cuda)
+    contending_model = NeuralNetwork(game, model_class, cuda=cuda)
     ckpts = winning_model.list_checkpoints()
     num_opponents = game.get_num_players() - 1
     current_winner = ckpts[0]
@@ -33,16 +34,18 @@ def rank_checkpoints(game, model_class, sims):
         
         scores, outcomes = play_match(game, [contending_player] + winners, verbose=False, permute=True)
         score, outcome = scores[contending_player], outcomes[contending_player]
+        print("Current Champ: {}    Challenger: {}    Outcome: {} <{}>    "
+                .format(current_winner, contender, outcome, score), end= "")
         if outcome == "Win":
             current_winner = contender
-        print("Current Champion:", current_winner, "Challenger:", contender, "Outcome:", outcome, score)
+        print("New Champ: {}".format(current_winner))
 
 
 # Plays the given checkpoint against all other checkpoints and logs upsets.
-def one_vs_all(checkpoint, game, model_class, sims):
-    my_model = NeuralNetwork(game, model_class)
+def one_vs_all(checkpoint, game, model_class, sims, cuda=False):
+    my_model = NeuralNetwork(game, model_class, cuda=cuda)
     my_model.load(checkpoint)
-    contending_model = NeuralNetwork(game, model_class)
+    contending_model = NeuralNetwork(game, model_class, cuda=cuda)
     ckpts = my_model.list_checkpoints()
     num_opponents = game.get_num_players() - 1
 
@@ -58,8 +61,8 @@ def one_vs_all(checkpoint, game, model_class, sims):
 # Finds the effective MCTS strength of a checkpoint
 # Also presents a control at each checkpoint - that is, the result
 # if you had used no heuristic but the same num_simulations.
-def effective_model_power(checkpoint, game, model_class, sims):
-    my_model = NeuralNetwork(game, model_class)
+def effective_model_power(checkpoint, game, model_class, sims, cuda=False):
+    my_model = NeuralNetwork(game, model_class, cuda=cuda)
     my_model.load(checkpoint)
     my_player = DeepMCTSPlayer(game, my_model, sims)
     strength = 10
@@ -86,11 +89,12 @@ def effective_model_power(checkpoint, game, model_class, sims):
 
 
 if __name__ == "__main__":
-    checkpoint = 76
-    game = TicTacToe()
-    model_class = MiniVGG
-    sims = 50
+    checkpoint = 345
+    game = Connect4()
+    model_class = SENet
+    sims = 100
+    cuda = True
     
-    #rank_checkpoints(game, model_class, sims)
-    #one_vs_all(checkpoint, game, model_class, sims)
-    effective_model_power(checkpoint, game, model_class, sims)
+    #rank_checkpoints(game, model_class, sims, cuda)
+    #one_vs_all(checkpoint, game, model_class, sims, cuda)
+    effective_model_power(checkpoint, game, model_class, sims, cuda)

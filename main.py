@@ -60,8 +60,8 @@ connect4_config_cuda = {
     "batch_size": 64,
     "num_threads": 1,
     "cuda": True,
-    "verbose": False,
-    "resume": False,
+    "verbose": True,
+    "resume": True,
 }
 
 leapfrog_config = {

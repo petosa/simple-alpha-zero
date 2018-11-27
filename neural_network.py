@@ -83,7 +83,8 @@ class NeuralNetwork():
         return torch.exp(dist)
 
     def save(self, name, training_data, error_log):
-        directory = "checkpoints/{}-{}".format(self.game.__class__.__name__, self.model.__class__.__name__)
+        network_name = self.model.module.__class__.__name__ if self.cuda else self.model.__class__.__name__
+        directory = "checkpoints/{}-{}".format(self.game.__class__.__name__, network_name)
         if not os.path.exists(directory):
             os.makedirs(directory)
         network_path = "{}/{}.ckpt".format(directory, name)
@@ -98,7 +99,8 @@ class NeuralNetwork():
             }, data_path)
 
     def load(self, name, load_supplementary_data=False):
-        directory = "checkpoints/{}-{}".format(self.game.__class__.__name__, self.model.__class__.__name__)
+        network_name = self.model.module.__class__.__name__ if self.cuda else self.model.__class__.__name__
+        directory = "checkpoints/{}-{}".format(self.game.__class__.__name__, network_name)
         network_path = "{}/{}.ckpt".format(directory, name)
         network_checkpoint = torch.load(network_path)
         self.model.load_state_dict(network_checkpoint['model_state_dict'])
@@ -109,7 +111,8 @@ class NeuralNetwork():
             return data_checkpoint['training_data'], network_checkpoint['error_log']
 
     def list_checkpoints(self):
-        path = "checkpoints/{}-{}/".format(self.game.__class__.__name__, self.model.__class__.__name__)
+        network_name = self.model.module.__class__.__name__ if self.cuda else self.model.__class__.__name__
+        path = "checkpoints/{}-{}/".format(self.game.__class__.__name__, network_name)
         if  not os.path.isdir(path):
             return []
         return sorted([int(filename.split(".ckpt")[0]) for filename in os.listdir(path) if filename.endswith(".ckpt")])
