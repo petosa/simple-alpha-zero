@@ -97,15 +97,16 @@ class NeuralNetwork():
             'training_data': training_data,
             }, data_path)
 
-    def load(self, name):
+    def load(self, name, load_supplementary_data=False):
         directory = "checkpoints/{}-{}".format(self.game.__class__.__name__, self.model.__class__.__name__)
         network_path = "{}/{}.ckpt".format(directory, name)
-        data_path = "{}/training.data".format(directory)
         network_checkpoint = torch.load(network_path)
         self.model.load_state_dict(network_checkpoint['model_state_dict'])
         self.optimizer.load_state_dict(network_checkpoint['optimizer_state_dict'])
-        data_checkpoint = torch.load(data_path)
-        return data_checkpoint['training_data'], network_checkpoint['error_log']
+        if load_supplementary_data:
+            data_path = "{}/training.data".format(directory)
+            data_checkpoint = torch.load(data_path)
+            return data_checkpoint['training_data'], network_checkpoint['error_log']
 
     def list_checkpoints(self):
         path = "checkpoints/{}-{}/".format(self.game.__class__.__name__, self.model.__class__.__name__)

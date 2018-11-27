@@ -106,9 +106,11 @@ class Trainer:
             print("Average train error:", mean_loss)
 
 
-    def evaluate_against_uninformed(self, uninformed_simulations, num_opponents):
-        uninformed= UninformedMCTSPlayer(self.game, uninformed_simulations)
+    def evaluate_against_uninformed(self, uninformed_simulations):
+        num_opponents = self.game.get_num_players() - 1
+        uninformeds = [UninformedMCTSPlayer(self.game, uninformed_simulations) for _ in range(num_opponents)]
         informed = DeepMCTSPlayer(self.game, self.nn, self.num_simulations)
-        score = play_match(self.game, [informed] + [uninformed]*num_opponents, permute=True)[informed]
-        print("Opponent strength: {}     My score: {}".format(uninformed_simulations,score))
+        scores, outcomes = play_match(self.game, [informed] + uninformeds, permute=True)
+        score, outcome = scores[informed], outcomes[informed]
+        print("Opponent strength: {}     My win rate: {} ({})".format(uninformed_simulations, round(score, 3), outcome))
 

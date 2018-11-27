@@ -23,3 +23,6 @@ class HumanPlayer(Player):
             print("Invalid move! Try again.")
         s_prime = self.game.take_action(s, template)
         return s_prime
+
+    def reset(self):
+        pass

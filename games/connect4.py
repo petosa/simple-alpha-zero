@@ -38,10 +38,11 @@ class Connect4(Game):
             if np.isin(4, correlate2d(board, i, mode="valid")): return p # Downward diagonol
             if np.isin(4, correlate2d(board, np.fliplr(i), mode="valid")): return p # Upward diagonol
 
-        
-
     def get_player(self, s):
         return int(s[0,0,2])
+
+    def get_num_players(self):
+        return 2
 
     # Print a human-friendly visualization of the board.
     def friendly_print(self, s):

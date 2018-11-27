@@ -6,11 +6,16 @@ from itertools import permutations
 # and gains no points if it ties.
 def play_match(game, players, verbose=False, permute=False):
 
+    # You can use permutations to break the dependence on player order in measuring strength.
     matches = list(permutations(players)) if permute else [players]
+    
+    # Initialize scoreboard
     scores = {}
     for p in players:
         scores[p] = 0
+        p.reset() # Reset incoming players as a precaution.
 
+    # Run the matches (there will be multiple if permute=True)
     for m in matches:
         s = game.get_initial_state()
         if verbose: game.friendly_print(s)
@@ -22,11 +27,26 @@ def play_match(game, players, verbose=False, permute=False):
             s = p.update_state(s)
             if verbose: game.friendly_print(s)
             winner = game.check_winner(s)
-        if winner != -1:
-            for i, p in enumerate(m):
-                scores[p] += 1 if i == winner else -1
+        for i, p in enumerate(m):
+            if winner == -1:
+                scores[p] += .5/len(matches)
+            elif winner == i:
+                scores[p] += 1/len(matches)
+            p.reset() # Clear our tree to make the next match fair
 
-    return scores
+    # Assign an outcome to each player (Win, Lose, or Tie)
+    outcomes = {}
+    num_players = game.get_num_players()
+    for p in scores:
+        if scores[p] < 1/num_players:
+            outcomes[p] = "Lose"
+        elif scores[p] == 1/num_players:
+            outcomes[p] = "Tie"
+        else:
+            outcomes[p] = "Win"
+
+    return scores, outcomes
+
 
 
 if __name__ == "__main__":
@@ -38,15 +58,19 @@ if __name__ == "__main__":
     from players.deep_mcts_player import DeepMCTSPlayer
     from games.connect4 import Connect4
     from games.tictactoe import TicTacToe
+    from games.leapfrog import ThreePlayerLeapFrog
 
+
+    # Change these variable 
     game = TicTacToe()
-    ckpt = 840
-    choices = [
-        HumanPlayer(game),
-        UninformedMCTSPlayer(game, simulations=1000),
-        DeepMCTSPlayer(game, NeuralNetwork(game, MiniVGG), simulations=50)
-    ]
-    choices[-1].tree.nn.load(ckpt)
-    players = [choices[0], choices[2]]
-    print(play_match(game, players, verbose=True))
+    ckpt = 75
+    nn = NeuralNetwork(game, MiniVGG)
+    nn.load(ckpt)
+    
+    # HumanPlayer(game),
+    # UninformedMCTSPlayer(game, simulations=1000)
+    # DeepMCTSPlayer(game, nn, simulations=50)
+    
+    players = [HumanPlayer(game), DeepMCTSPlayer(game, nn, simulations=50)]
+    print(play_match(game, players, verbose=True, permute=False))
     

@@ -6,6 +6,7 @@ from models.bigvgg import BigVGG
 from models.resnet import ResNet
 from models.senet import SENet
 from games.tictactoe import TicTacToe
+from games.leapfrog import ThreePlayerLeapFrog
 from games.connect4 import Connect4
 from games.guessit import TwoPlayerGuessIt
 from neural_network import NeuralNetwork
@@ -15,19 +16,18 @@ from train import Trainer
 tictactoe_config = {
     "game": TicTacToe,
     "model": MiniVGG,
-    "ckpt_frequency": 10,
-    "num_updates": 100,
+    "ckpt_frequency": 1,
+    "num_updates": 1000,
     "num_games": 30,
     "weight_decay": 1e-4,
     "lr": 1e-3,
     "cpuct": 3,
-    "num_simulations": 15,
+    "num_simulations": 50,
     "batch_size": 64,
     "num_threads": 4,
     "cuda": False,
     "verbose": True,
-    "num_opponents": 1,
-    "resume": True,
+    "resume": False,
 }
 
 connect4_config = {
@@ -44,7 +44,6 @@ connect4_config = {
     "num_threads": 2,
     "cuda": False,
     "verbose": False,
-    "num_opponents": 1,
     "resume": False,
 }
 
@@ -52,17 +51,33 @@ connect4_config_cuda = {
     "game": Connect4,
     "model": SENet,
     "ckpt_frequency": 5,
-    "num_updates": 100,
+    "num_updates": 1000,
     "num_games": 30,
     "weight_decay": 1e-4,
-    "lr": 1e-6,
+    "lr": 1e-3,
     "cpuct": 3,
     "num_simulations": 50,
     "batch_size": 64,
     "num_threads": 1,
     "cuda": True,
     "verbose": False,
-    "num_opponents": 1,
+    "resume": False,
+}
+
+leapfrog_config = {
+    "game": ThreePlayerLeapFrog,
+    "model": MLP,
+    "ckpt_frequency": 1,
+    "num_updates": 1000,
+    "num_games": 30,
+    "weight_decay": 1e-4,
+    "lr": 1e-3,
+    "cpuct": 3,
+    "num_simulations": 50,
+    "batch_size": 64,
+    "num_threads": 4,
+    "cuda": False,
+    "verbose": True,
     "resume": False,
 }
 
@@ -86,7 +101,7 @@ if config["resume"]:
         print("No existing checkpoints to resume.")
         quit()
     iteration = checkpoints[-1]
-    pi.training_data, pi.error_log = nn.load(iteration)
+    pi.training_data, pi.error_log = nn.load(iteration, load_supplementary_data=True)
 else:
     if len(checkpoints) != 0:
         print("Please delete the existing checkpoints for this game+model combination, or change resume flag to True.")
@@ -102,11 +117,11 @@ while True:
         if config["verbose"]: print("Training examples:", len(pi.training_data))
     
     nn.save(name=iteration, training_data=pi.training_data, error_log=pi.error_log)
-    pi.evaluate_against_uninformed(10, config["num_opponents"])
-    pi.evaluate_against_uninformed(20, config["num_opponents"])
-    pi.evaluate_against_uninformed(40, config["num_opponents"])
-    pi.evaluate_against_uninformed(80, config["num_opponents"])
-    pi.evaluate_against_uninformed(160, config["num_opponents"])
-    pi.evaluate_against_uninformed(320, config["num_opponents"])
-    pi.evaluate_against_uninformed(640, config["num_opponents"])
-    pi.evaluate_against_uninformed(1280, config["num_opponents"])
+    pi.evaluate_against_uninformed(10)
+    pi.evaluate_against_uninformed(20)
+    pi.evaluate_against_uninformed(40)
+    pi.evaluate_against_uninformed(80)
+    pi.evaluate_against_uninformed(160)
+    pi.evaluate_against_uninformed(320)
+    pi.evaluate_against_uninformed(640)
+    pi.evaluate_against_uninformed(1280)
