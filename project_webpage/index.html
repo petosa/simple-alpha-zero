@@ -56,8 +56,8 @@ One or two sentences on the main result you obtained. -->
 <!-- SOURCE: https://www.google.com/url?sa=i&source=images&cd=&cad=rja&uact=8&ved=2ahUKEwj95M6DsvDeAhXpQd8KHWFCDv0QjRx6BAgBEAU&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMonte_Carlo_tree_search&psig=AOvVaw0x_Q2shAPS29D3Pj6xeL0A&ust=1543264316465916 -->
 <img style="height: 200px;" alt="" src="images/mcts.png">
 </div>
-
 <br><br>
+
 <h2> Introduction and Motivation </h2>
 <h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
 <p>Our goal was to independently replicate the implementation of AlphaZero and test it out on games such as Tic-Tac-Toe and Connect-4. Since the algorithm is generalized, the same algorithm can be plugged into any discrete, deterministic game with perfect information, and should be able to find powerful policies. Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based on solely its associated rules. We would not provide the algorithm with any other information such as game trajectories by grandmasters etc.</p>
@@ -73,7 +73,66 @@ One or two sentences on the main result you obtained. -->
 <h2> Background: Monte Carlo Tree Search (MCTS)</h2>
 <p> As mentioned above, the AlphaZero algorithm makes use of MCTS to try moves depending on how well it thinks the moves will perform. This helps to simply focus on game moves that will most likely occur and also perform well. The algorithm works with  games that are discrete, deterministic and have perfect information - this means that they must have distinct moves and positions, have fixed outcomes for each move, players must compete against one another but can see everything that happens. </p>
 
-<p> </p>
+<p> The game starts at a starting state s<sub>0</sub>, and can choose to move from a set of actions A. The tree initially starts with a sole node that corresponds to s<sub>0</sub>, and this node is expanded by trying every possible action in A. Corresponding child nodes are created for each action. The diagram below shows how this first step works. </p>
+
+<br><br>
+<div style="text-align: center;">
+<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
+<img style="height: 300px;" alt="" src="images/mcts1.png">
+</div>
+<br><br>
+
+<p> Each of these new child nodes is then propagated by making random moves until a final state (winning, losing or tying) is reached. These finals states have associated scores - wins get +1, ties get 0 and losses get -1. The final value that is given to each child node may not represent the outcome of the most optimal play because propagating the state can be done in multiple ways - choose moves at random, follow a random strategy or estimate the value of the state more intelligently. One example of propagating a child state is shown below. </p>
+
+<br><br>
+<div style="text-align: center;">
+<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
+<img style="height: 100px;" alt="" src="images/mcts2.png">
+</div>
+<br><br>
+
+<p> The value of the node (W) and the number of propagations that have been executed (N) are stored alongside the corresponding child node. These values are then sent up through the tree and contribute to the W and N of the parent node. The accumulated values are stored for the parent node. These steps are shown below.</p>
+
+<br><br>
+<div style="text-align: center;">
+<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
+<img style="height: 300px;" alt="" src="images/mcts3.png">
+</div>
+<br><br>
+
+<div style="text-align: center;">
+<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
+<img style="height: 300px;" alt="" src="images/mcts4.png">
+</div>
+<br><br>
+
+<p> This combination of expanding nodes, unravelling their value and the propagating the information upwards occurs over multiple iterations. The algorithm does not expand all the leaf nodes (this would be very computationally expensive), and instead it chooses nodes that balance between having high estimated values (W) and having low visit counts (N). MCTS chooses to expand the leaf with the highest upper confidence tree score (UCT) - the equation is shown below. </p>
+
+<div style="text-align: center;">
+<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
+<img style="height: 100px;" alt="" src="images/mcts5.png">
+</div>
+<br><br>
+
+<p> Having a low value for c wil encourage the algorithm to choose nodes with a high W, while a low c value will encourage the search to pick nodes with a low N to explore. The value of c is often set empirically. The W<sub>i</sub> and N<sub>i</sub> correspond to the accumulated value and the visit count for the i<sup>th</sup> child. N<sub>p</sub> is the visit count of the parent node. At c = 1, the UCT score's for the Tic-Tac-Toe tree we have been following are shown below: </p>
+
+<div style="text-align: center;">
+<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
+<img style="height: 400px;" alt="" src="images/mcts6.png">
+</div>
+<br><br>
+
+<p> Since state s<sub>0, 1</sub> has the highest UCT score, it is picked first to explore. As before, it is expanded, and the values are propagated back through the tree. In this example, the W value reflects player X's wins and losses. The algorithm keeps track of the current player (and flips the sign of W whenever the players switch). </p>
+
+<div style="text-align: center;">
+<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
+<img style="height: 300px;" alt="" src="images/mcts7.png">
+</div>
+<br><br>
+
+
+<p>  </p>
+
 
 <br><br>
 <!-- Approach -->
