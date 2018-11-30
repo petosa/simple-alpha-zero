@@ -70,6 +70,7 @@ One or two sentences on the main result you obtained. -->
 
 <p> Multi-Player? Talk about the SENet etc.? </p>
 
+<br><br>
 <h2> Background: Monte Carlo Tree Search (MCTS)</h2>
 <p> As mentioned above, the AlphaZero algorithm makes use of MCTS to try moves depending on how well it thinks the moves will perform. This helps to simply focus on game moves that will most likely occur and also perform well. The algorithm works with  games that are discrete, deterministic and have perfect information - this means that they must have distinct moves and positions, have fixed outcomes for each move, players must compete against one another but can see everything that happens. </p>
 
@@ -77,7 +78,6 @@ One or two sentences on the main result you obtained. -->
 
 <br><br>
 <div style="text-align: center;">
-<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
 <img style="height: 300px;" alt="" src="images/mcts1.png">
 </div>
 <br><br>
@@ -86,7 +86,6 @@ One or two sentences on the main result you obtained. -->
 
 <br><br>
 <div style="text-align: center;">
-<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
 <img style="height: 100px;" alt="" src="images/mcts2.png">
 </div>
 <br><br>
@@ -95,21 +94,18 @@ One or two sentences on the main result you obtained. -->
 
 <br><br>
 <div style="text-align: center;">
-<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
 <img style="height: 300px;" alt="" src="images/mcts3.png">
 </div>
 <br><br>
 
 <div style="text-align: center;">
-<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
-<img style="height: 300px;" alt="" src="images/mcts4.png">
+<img style="height: 350px;" alt="" src="images/mcts4.png">
 </div>
 <br><br>
 
 <p> This combination of expanding nodes, unravelling their value and the propagating the information upwards occurs over multiple iterations. The algorithm does not expand all the leaf nodes (this would be very computationally expensive), and instead it chooses nodes that balance between having high estimated values (W) and having low visit counts (N). MCTS chooses to expand the leaf with the highest upper confidence tree score (UCT) - the equation is shown below. </p>
 
 <div style="text-align: center;">
-<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
 <img style="height: 100px;" alt="" src="images/mcts5.png">
 </div>
 <br><br>
@@ -117,7 +113,6 @@ One or two sentences on the main result you obtained. -->
 <p> Having a low value for c wil encourage the algorithm to choose nodes with a high W, while a low c value will encourage the search to pick nodes with a low N to explore. The value of c is often set empirically. The W<sub>i</sub> and N<sub>i</sub> correspond to the accumulated value and the visit count for the i<sup>th</sup> child. N<sub>p</sub> is the visit count of the parent node. At c = 1, the UCT score's for the Tic-Tac-Toe tree we have been following are shown below: </p>
 
 <div style="text-align: center;">
-<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
 <img style="height: 400px;" alt="" src="images/mcts6.png">
 </div>
 <br><br>
@@ -125,43 +120,36 @@ One or two sentences on the main result you obtained. -->
 <p> Since state s<sub>0, 1</sub> has the highest UCT score, it is picked first to explore. As before, it is expanded, and the values are propagated back through the tree. In this example, the W value reflects player X's wins and losses. The algorithm keeps track of the current player (and flips the sign of W whenever the players switch). </p>
 
 <div style="text-align: center;">
-<!-- SOURCE: http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ -->
-<img style="height: 300px;" alt="" src="images/mcts7.png">
+<img style="height: 500px;" alt="" src="images/mcts7.png">
 </div>
 <br><br>
 
+<p> The MCTS will continue to run multiple iterations until time runs out. Based on the chosen and tuned parameters, the tree goes through a good balance of expansion and exploration to eventually identify the best move to make. Then in the original game, the first child with the highest N value is picked. If the final tree looked like the one below, the algorithm would choose the action that led to s<sub>0, 1</sub>. </p>
 
-<p>  </p>
-
-
+<div style="text-align: center;">
+<img style="height: 350px;" alt="" src="images/mcts8.png">
+</div>
 <br><br>
-<!-- Approach -->
+
 <h2>Approach</h2>
 <h4>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</h4>
-<p> </p>
+<p> TO ADD </p>
 
 <h4>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</h4>
-Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
+<p> TO ADD </p>
+<p> will the implementation be correct; carried out exhaustive tests and created a test bed to ensure it is accurate </p>
 
 <br><br>
-<!-- Results -->
 <h2>Experiments and Results</h2>
 <h4>How did you measure success? What experiments were used? What were the results, both quantitative and qualitative? Did you succeed? Did you fail? Why?</h4>
-Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.
-
-<br><br>
-
-<!-- Main Results Figure --> 
-<div style="text-align: center;">
-<img style="height: 300px;" alt="" src="images/alphazero.png">
-</div>
-<br><br>
+<p> TO ADD </p>
 
   <hr>
   <footer> 
-  <p>© Nick Petosa, Robert Keezer, Nupur Chatterji </p>
   <p>This webpage template is based on a similar one from Dr. Devi Parikh's
   <a href="https://samyak-268.github.io/F18CS4476/">Intro to Computer Vision course</a>.</p>
+  <p> The MCTS diagrams were based on a <a href="http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/"> blog </a></p>
+  <p>© Nick Petosa, Robert Keezer, Nupur Chatterji </p>
   </footer>
 </div>
 </div>
