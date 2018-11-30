@@ -36,11 +36,6 @@ color: #FF9900;
 <span style="font-size: 18px; line-height: 1.5em;">Georgia Institute of Technology</span>
 <hr>
 
-<div style="text-align: center;">
-<!-- SOURCE: https://www.ocf.berkeley.edu/~yosenl/extras/alphabeta/alphabeta.jpg -->
-<img style="height: 200px;" alt="" src="images/ttt.png">
-</div>
-
 <!-- Goal -->
 <h2>Abstract</h2>
 <!-- 
@@ -50,9 +45,10 @@ One or two sentences on the main result you obtained. -->
 
 <p> We were inspired by the work done by DeepMind on AlphaZero - an algorithm developed to play games by simply using the rules of the game, without any prior knowledge or example expert-played games. The AlphaZero algorithm is a generalization of the AlphaGo Zero algorithm (used specifically for the game of Go), which uses a combination of deep neural networks and reinforcement learning. </p>
 
-<p> AlphaZero leverages the Monte-Carlo Tree Search (MCTS) algorithm in order to traverse through various possible game states. As part of our project, we opted to mimic this approach, and test it on smaller games such as Tic-Tac-Toe and Connect 4. We wanted to see if we could: GOAL -- get same results, improve existing results? </p>
+<p> AlphaZero leverages the Monte-Carlo Tree Search (MCTS) algorithm in order to traverse through various possible game states. As part of our project, we opted to mimic this approach, and test it on smaller games such as Tic-Tac-Toe and Connect 4. As part of this project, we wanted to see if we could implement the AlphaZero algorithm from scratch. </p>
 
 <p> TO DO: MAIN RESULTS. </p>
+
 
 <br><br>
 <!-- Main Illustrative Figure --> 
@@ -62,22 +58,28 @@ One or two sentences on the main result you obtained. -->
 </div>
 
 <br><br>
-<!-- Introduction -->
-<h2> Introduction / Background / Motivation </h2>
+<h2> Introduction and Motivation </h2>
 <h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
-<p>Our goal was to independently replicate the implementation of AlphaZero and test it out on games such as Tic-Tac-Toe and Connect-4. Since the algorithm is generalized, the same algorithm could be plugged into any game scenario, and should be able to perform. Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based on solely its associated rules. We would not provide the algorithm with any other information such as game trajectories by grandmasters etc.</p>
+<p>Our goal was to independently replicate the implementation of AlphaZero and test it out on games such as Tic-Tac-Toe and Connect-4. Since the algorithm is generalized, the same algorithm can be plugged into any discrete, deterministic game with perfect information, and should be able to find powerful policies. Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based on solely its associated rules. We would not provide the algorithm with any other information such as game trajectories by grandmasters etc.</p>
 
 <h4>How is it done today, and what are the limits of current practice?</h4>
-<p>Currently, AlphaZero is at the forefront of systems that can learn by itself and master highly complex games. Stockfish has also been known to dabble in this field, but their results have not been as impressive as AlphaZero. In fact, in a match of 100 games, AlphaZero beat Stockfish 64-36, a landslide victory. AlphaZero's key benefit lies in the fact that it does not require masses of data and can self-learn how to play the game. Combined with the increase in computational power now available, training the network to play a game of choice has almost become straightforward. </p>
+<p>Currently, AlphaZero is at the forefront of systems that can learn by itself (i.e. through self-play) and master highly complex games (such as Chess and Go). Stockfish has also been known to dabble in this field, but their results have not been as impressive as AlphaZero. In fact, in a match of 100 games, AlphaZero beat Stockfish 64-36, a landslide victory. We do note though that there have been doubts about the validity of these claims. AlphaZero's key benefit lies in the fact that it does not require masses of data and can self-learn how to play the game. Combined with the increase in computational power now available, training the network to play a game of choice has almost become straightforward. Nobody has yet been able to replicate the results that DeepMind achieved. </p>
 
 <h4>Who cares? If you are successful, what difference will it make?</h4>
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+<p> As mentioned before, our goal was to implement the AlphaZero algorithm from scratch. We believe that it is a cleaner implementation (compared to other implementations of AlphaGo Zero), it is more accessible, and it is well-tested. In the code bank, there is a test bed that can be scaled up (perhaps using TPUs). Having this set up will also provide good headway for future research - testing different types of deep nets, introducing multi-player etc.</p>
+
+<p> Multi-Player? Talk about the SENet etc.? </p>
+
+<h2> Background: Monte Carlo Tree Search (MCTS)</h2>
+<p> As mentioned above, the AlphaZero algorithm makes use of MCTS to try moves depending on how well it thinks the moves will perform. This helps to simply focus on game moves that will most likely occur and also perform well. The algorithm works with  games that are discrete, deterministic and have perfect information - this means that they must have distinct moves and positions, have fixed outcomes for each move, players must compete against one another but can see everything that happens. </p>
+
+<p> </p>
 
 <br><br>
 <!-- Approach -->
 <h2>Approach</h2>
 <h4>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</h4>
-Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+<p> </p>
 
 <h4>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</h4>
 Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo.
@@ -99,7 +101,7 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
   <hr>
   <footer> 
   <p>© Nick Petosa, Robert Keezer, Nupur Chatterji </p>
-  <p>This webpage template is based on a similar template from Dr. Devi Parikh's
+  <p>This webpage template is based on a similar one from Dr. Devi Parikh's
   <a href="https://samyak-268.github.io/F18CS4476/">Intro to Computer Vision course</a>.</p>
   </footer>
 </div>
