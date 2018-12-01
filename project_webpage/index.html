@@ -43,12 +43,11 @@ One or two sentences on the motivation behind the problem you are solving.
 One or two sentences describing the approach you took. 
 One or two sentences on the main result you obtained. -->
 
-<p> We were inspired by the work done by DeepMind on AlphaZero - an algorithm developed to play games by simply using the rules of the game, without any prior knowledge or example expert-played games. The AlphaZero algorithm is a generalization of the AlphaGo Zero algorithm (used specifically for the game of Go), which uses a combination of deep neural networks and reinforcement learning. </p>
+<p> We were inspired by the work done by DeepMind on AlphaZero - an algorithm developed to play games by simply using the rules of the game, without any prior knowledge or example expert-played games. The AlphaZero algorithm uses a combination of deep neural networks and reinforcement learning and is a generalization of the AlphaGo Zero algorithm (used specifically for the game of Go). </p>
 
-<p> AlphaZero leverages the Monte-Carlo Tree Search (MCTS) algorithm in order to traverse through various possible game states. As part of our project, we opted to mimic this approach, and test it on smaller games such as Tic-Tac-Toe and Connect 4. As part of this project, we wanted to see if we could implement the AlphaZero algorithm from scratch. </p>
+<p> AlphaZero leverages the Monte Carlo Tree Search (MCTS) algorithm in order to traverse through various promising game states. We opted to mimic this approach, and test it on smaller games such as Tic-Tac-Toe and Connect 4. Our implementation of AlphaZero was built complete from scratch. </p>
 
 <p> TO DO: MAIN RESULTS. </p>
-
 
 <br><br>
 <!-- Main Illustrative Figure --> 
@@ -60,21 +59,27 @@ One or two sentences on the main result you obtained. -->
 
 <h2> Introduction and Motivation </h2>
 <h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
-<p>Our goal was to independently replicate the implementation of AlphaZero and test it out on games such as Tic-Tac-Toe and Connect-4. Since the algorithm is generalized, the same algorithm can be plugged into any discrete, deterministic game with perfect information, and should be able to find powerful policies. Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based on solely its associated rules. We would not provide the algorithm with any other information such as game trajectories by grandmasters etc.</p>
+<p>Our goal was to independently replicate the implementation of AlphaZero and test it out on games such as Tic-Tac-Toe and Connect-4. Since the algorithm is generalized, the same algorithm can be plugged into any discrete, deterministic game with perfect information, and should be able to find powerful policies through self-play. Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based on solely its associated rules. We would not provide the algorithm with any other information such as game trajectories by grandmasters etc.</p>
 
 <h4>How is it done today, and what are the limits of current practice?</h4>
 <p>Currently, AlphaZero is at the forefront of systems that can learn by itself (i.e. through self-play) and master highly complex games (such as Chess and Go). Stockfish has also been known to dabble in this field, but their results have not been as impressive as AlphaZero. In fact, in a match of 100 games, AlphaZero beat Stockfish 64-36, a landslide victory. We do note though that there have been doubts about the validity of these claims. AlphaZero's key benefit lies in the fact that it does not require masses of data and can self-learn how to play the game. Combined with the increase in computational power now available, training the network to play a game of choice has almost become straightforward. Nobody has yet been able to replicate the results that DeepMind achieved. </p>
 
-<h4>Who cares? If you are successful, what difference will it make?</h4>
-<p> As mentioned before, our goal was to implement the AlphaZero algorithm from scratch. We believe that it is a cleaner implementation (compared to other implementations of AlphaGo Zero), it is more accessible, and it is well-tested. In the code bank, there is a test bed that can be scaled up (perhaps using TPUs). Having this set up will also provide good headway for future research - testing different types of deep nets, introducing multi-player etc.</p>
+<p> Connect 4 and tictactoe being solved; different searches (Alpha Beta, Minimax) check paper; we cannot replicate because TPU not available; </p>
 
-<p> Multi-Player? Talk about the SENet etc.? </p>
+<h4>Who cares? If you are successful, what difference will it make?</h4>
+<p> As mentioned before, our goal was to implement the AlphaZero algorithm from scratch. We believe that the implementation is far more accessible and modular, and it is well-tested. In the code bank, there is a test bed that can be scaled up (perhaps using TPUs). Having this set up will also provide good headway for future research - testing different types of deep nets, introducing multi-player etc.</p>
+
+<p> Modular (swap out the game and swap out the network) </p>
+
+<p> TO DO: Multi-Player? Talk about the SENet etc.? </p>
 
 <br><br>
 <h2> Background: Monte Carlo Tree Search (MCTS)</h2>
-<p> As mentioned above, the AlphaZero algorithm makes use of MCTS to try moves depending on how well it thinks the moves will perform. This helps to simply focus on game moves that will most likely occur and also perform well. The algorithm works with  games that are discrete, deterministic and have perfect information - this means that they must have distinct moves and positions, have fixed outcomes for each move, players must compete against one another but can see everything that happens. </p>
+<p> The AlphaZero algorithm uses MCTS for policy improvement and competetive play. AlphaZero improves upon basic MCTS by introducing a deep heuristic during search. We first wanted to understand how basic, uninformed MCTS works. OVERVIEW SENTENCE.
 
-<p> The game starts at a starting state s<sub>0</sub>, and can choose to move from a set of actions A. The tree initially starts with a sole node that corresponds to s<sub>0</sub>, and this node is expanded by trying every possible action in A. Corresponding child nodes are created for each action. The diagram below shows how this first step works. </p>
+The algorithm works with games that are discrete, deterministic and have perfect information - this means that they must have distinct moves and positions, have fixed outcomes for each move, players must compete against one another but can see everything that happens. </p>
+
+<p> The search tree always begins by expanding the game's starting state s<sub>init</sub>, by considering every possible action. For a game like Tic-Tac-Toe this initial state would be an empty 3 by 3 board, and a possible action would be placing an X in the center slot. The diagram below shows how this first step works for a state further down the Tic-Tac-Toe game tree. </p>
 
 <br><br>
 <div style="text-align: center;">
@@ -82,7 +87,7 @@ One or two sentences on the main result you obtained. -->
 </div>
 <br><br>
 
-<p> Each of these new child nodes is then propagated by making random moves until a final state (winning, losing or tying) is reached. These finals states have associated scores - wins get +1, ties get 0 and losses get -1. The final value that is given to each child node may not represent the outcome of the most optimal play because propagating the state can be done in multiple ways - choose moves at random, follow a random strategy or estimate the value of the state more intelligently. One example of propagating a child state is shown below. </p>
+<p> Each of these new child nodes is then played out by making random moves until a final state (winning, losing or tying) is reached. These finals states have associated scores - wins get +1, ties get 0 and losses get -1. Reaching an outcome (win/loss/tie) through random play gives us an indication as to how promising a state is. One example of playing out a child state is shown below. </p>
 
 <br><br>
 <div style="text-align: center;">
@@ -90,7 +95,9 @@ One or two sentences on the main result you obtained. -->
 </div>
 <br><br>
 
-<p> The value of the node (W) and the number of propagations that have been executed (N) are stored alongside the corresponding child node. These values are then sent up through the tree and contribute to the W and N of the parent node. The accumulated values are stored for the parent node. These steps are shown below.</p>
+TO DO: edge, re do diagrams
+
+<p> The value of the node (W) and the number of play outs that have been executed (N) is stored for each edge. These values are then sent up through the tree and contribute to the W and N of the parent node. The accumulated values are stored for the parent node. These steps are shown below.</p>
 
 <br><br>
 <div style="text-align: center;">
