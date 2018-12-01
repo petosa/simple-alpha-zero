@@ -140,16 +140,111 @@ TO DO: edge, re do diagrams
 
 <h2>Approach</h2>
 <h4>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</h4>
-<p> TO ADD </p>
+
+We implemented AlphaZero from scratch and used it train an agent to master Tic-Tac-Toe and Connect 4. Our implementation is done using python, numpy, and pytorch.
+We believed that we would be able to succeed because both games have a relatively small branching factor and number of game states compared to a game like Go.
+and the AlphaZero algorithms purports to be generalizable to different games. We directly compare the performance of the algorithm across three different network architectures.<br>
+TO DO: Mention multi-player support.
 
 <h4>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</h4>
-<p> TO ADD </p>
-<p> will the implementation be correct; carried out exhaustive tests and created a test bed to ensure it is accurate </p>
+
+One problem we anticipated was computation time. From the AlphaZero paper, training an agent to play Go took just 8 hours to master the game - but required over 5000 TPUs.
+The only resource we had access to was a GTX 1070 in a desktop machine running Ubuntu.
+It would take approximately 22 years to replicate DeepMind's Go program on our hardware.
+It was important to limit the scope of this project to something feasible with our hardware by picking a simpler game.
+Training a Tic-Tac-Toe agent was our immediate goal, and training a Connect 4 agent was our reach goal.
+Go has has an average branching factor 250 and about 2*10<sup>170</sup> game states.
+Compare that to the simplicity of the other games:
+Tic-Tac-Toe has a maximum branching factor of 9 and about 5000 game states, and Connect 4 has a maximum branching factor of 6 and about 4.5 trillion game states.
+<br><br>
+Another problem we anticipated was the complexity of implementing AlphaZero from scratch.
+There are many intricate components like MCTS that are bug-prone.
+If any component was bugged, the entire AlphaZero pipeline would fail.
+To couteract this, we wrote extensive unit tests for all components during development.
+In total, we created 31 tests for our implementation.
+<br><br>
+An unanticipated problem that we encountered was AlphaZero's sensitivity to certain hyperparameters.
+
+AlphaZero works by generating games of self-play as training data, and then updating its network based off that experience.
+One tricky hyperparameter we had to tune was the number of self-play examples generated per network.
+The AlphaZero paper offered no guidance on this value, so we initially started it at 1 - that is, 1 game generated per network.
+We found that at this frequency learning was unstable - policies would change drastically between subsequent networks, impairing learning.
+After some experimenting, we found that generating at least 30 training data games per iteration enabled stable learning.
+
+<h4>Hyperparameters</h4>
+One of the attractive qualities of the AlphaZero paper is that DeepMind used the same hyperparameters across each game they trained it on.
+Similarly, after much trial and error, we arrived at a set of hyperparameters that worked well across different games and networks.
+Experimenting with different hyperparameters is expensive because AlphaZero takes a long time to train, so once we discovered a set of hyperparameters that yielded good performance across many games and networks we stopped tweaking.
+
+<br><br>
+Algorithm parameters
+<ul>
+  <li>Number of self-play games generated per network: 30</li>
+  <li>Number of batches per update: 1000</li>
+  <li>MCTS iterations per move: 50 (Set as 800 in AlphaZero paper)</li>
+  <li>cpuct: 3</li>
+</ul>
+<br>
+Network parameters
+<ul>
+  <li>Optimizer: Adam (SGD+Momentum in AlphaZero paper)</li>
+  <li>Learning rate: 1e-3 (1e-2 -> 1e-4 decay in AlphaZero paper)</li>
+  <li>Batch size: 64 (2048 in AlphaZero paper)</li>
+  <li>L2 regularization: 1e-4 (Same as AlphaZero paper)</li>
+</ul>
+
+To avoid overfitting, L2 regularization is set to 1e-4 as suggested in the AlphaZero paper.
+Generalization is important for this task because the network will only see a small subset of all possible boards during training.
+Generalization empowers the network to have a good sense as to whether a novel state encountered during play is promising, which is useful if the game enters unknown territory.
 
 <br><br>
 <h2>Experiments and Results</h2>
 <h4>How did you measure success? What experiments were used? What were the results, both quantitative and qualitative? Did you succeed? Did you fail? Why?</h4>
-<p> TO ADD </p>
+<p>
+Since we experimented with two separate games, we will report the results for both games separately. 
+Overall, our implementation of AlphaZero was successful with both games.
+We experimented with three different network architectures, described below.
+</p>
+<table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
+  <tr>
+    <th>Name</th> <th>Description</th> <th>Number of parameters</th>
+  </tr>
+  <tr>
+    <td>MLP</td> <td>Two-layer fully connected network with 200 hidden units.</td> <td>7,610</td>
+  </tr>
+  <tr>
+      <td>Mini/Small VGG</td> <td>Two-layer convolutional network with 2x2 or 4x4 filters.</td> <td>~40,000</td>
+  </tr>
+  <tr>
+      <td>SENet</td> <td>A deeper (4-layer) squeeze-and-excitation convolutional network.</td> <td>11,260,354</td>
+  </tr>
+</table>
+<p>
+These models are quite anemic compared to the 40-layer ResNet used by DeepMind, but our hope was that simpler games could be learned with simpler models.
+</p>
+<h5> Tic-Tac-Toe </h5>
+<p>
+  One measure of success is how well the network learned from self-play data.
+  We can analyze the training loss curve of our networks.
+  The lower the loss achieved, the more successful of a heuristic was learned.
+  Training error only tells us how successful our network is during self-play - it does not necessarily generalize to real-world games.
+  That said, assuming proper regularization, lower training error means a smarter agent.
+</p>
+<img src="images/ttt_error.png"/>
+<p>
+  Regardless of architecture choice, with more and more iterations of training, train error decreases.
+  This result on its own is exciting; deep RL techniques are notoriously unstable, yet looking at this graph we see stable learning.
+  Network architecture has a noticeable impact on error - the two layer fully-connected MLP has higher error after the same number of iterations as the shallow CNN (MiniVGG) or deep CNN (SENet).
+  For a simple game like Tic-Tac-Toe, making our network deeper does not confer a significant advantage over using a shallower network.
+</p>
+
+<p>
+  So the convolutional networks have lower self-play training error, but we would like to know how well they generalize.
+  To test the strength of each network, we developed a novel benchmark: each agent plays against vanilla MCTS agents of increasing strength until they are defeated.
+  Specifically, the number of MCTS iterations per turn doubles with each consecutive opponent.
+  In this way, we can compare the relative strengths of the networks and get a better idea of how well their strategies generalize outside of self-play.
+  
+</p>
 
   <hr>
   <footer> 
