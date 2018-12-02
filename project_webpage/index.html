@@ -144,13 +144,16 @@ TO DO: edge, re do diagrams
 <h2>Approach</h2>
 <h4>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</h4>
 
+<p>
 We implemented AlphaZero from scratch and used it train an agent to master Tic-Tac-Toe and Connect 4. Our implementation is done using python, numpy, and pytorch.
 We believed that we would be able to succeed because both games have a relatively small branching factor and number of game states compared to a game like Go.
 and the AlphaZero algorithms purports to be generalizable to different games. We directly compare the performance of the algorithm across three different network architectures.<br>
 TO DO: Mention multi-player support.
+</p>
 
 <h4>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</h4>
 
+<p>
 One problem we anticipated was computation time. From the AlphaZero paper, training an agent to play Go took just 8 hours to master the game - but required over 5000 TPUs.
 The only resource we had access to was a GTX 1070 in a desktop machine running Ubuntu.
 It would take approximately 22 years to replicate DeepMind's Go program on our hardware.
@@ -173,13 +176,14 @@ One tricky hyperparameter we had to tune was the number of self-play examples ge
 The AlphaZero paper offered no guidance on this value, so we initially started it at 1 - that is, 1 game generated per network.
 We found that at this frequency learning was unstable - policies would change drastically between subsequent networks, impairing learning.
 After some experimenting, we found that generating at least 30 training data games per iteration enabled stable learning.
+</p>
 
 <h4>Hyperparameters</h4>
+<p>
 One of the attractive qualities of the AlphaZero paper is that DeepMind used the same hyperparameters across each game they trained it on.
 Similarly, after much trial and error, we arrived at a set of hyperparameters that worked well across different games and networks.
 Experimenting with different hyperparameters is expensive because AlphaZero takes a long time to train, so once we discovered a set of hyperparameters that yielded good performance across many games and networks we stopped tweaking.
-
-<br><br>
+</p>
 Algorithm parameters
 <ul>
   <li>Number of self-play games generated per network: 30</li>
@@ -195,13 +199,13 @@ Network parameters
   <li>Batch size: 64 (2048 in AlphaZero paper)</li>
   <li>L2 regularization: 1e-4 (Same as AlphaZero paper)</li>
 </ul>
-
+<p>
 To avoid overfitting, L2 regularization is set to 1e-4 as suggested in the AlphaZero paper.
 Generalization is important for this task because the network will only see a small subset of all possible boards during training.
 Generalization empowers the network to have a good sense as to whether a novel state encountered during play is promising, which is useful if the game enters unknown territory.
-
+</p>
 <br><br>
-<h2>Experiments and Results</h2>
+<h2>Experiments and Results: Overview</h2>
 <h4>How did you measure success? What experiments were used? What were the results, both quantitative and qualitative? Did you succeed? Did you fail? Why?</h4>
 <p>
 Since we experimented with two separate games, we will report the results for both games separately. 
@@ -225,7 +229,15 @@ We experimented with three different network architectures, described below.
 <p>
 These models are quite anemic compared to the 40-layer ResNet used by DeepMind, but our hope was that simpler games could be learned with simpler models.
 </p>
-<h5> Tic-Tac-Toe </h5>
+<br>
+<h2>Experiments and Results: Tic-Tac-Toe</h2>
+<h5>About Tic-Tac-Toe</h5>
+<p>
+  Tic-Tac-Toe is played on a 3x3 board. Players alternate turns placing an X or O in an open spot.
+  If a player get three of their symbols in a row, they win.
+  Tic-Tac-Toe is a solved game - optimal play from both players will result in a tie.
+</p>
+<h5> Training Error </h5>
 <p>
   One measure of success is how well the network learned from self-play data.
   We can analyze the training loss curve of our networks.
@@ -233,28 +245,41 @@ These models are quite anemic compared to the 40-layer ResNet used by DeepMind, 
   Training error only tells us how successful our network is during self-play - it does not necessarily generalize to real-world games.
   That said, assuming proper regularization, lower training error means a smarter agent.
 </p>
-<img src="images/ttt_error.png"/>
+<center><img src="images/ttt_error.png"></center>
+
 <p>
   Regardless of architecture choice, with more and more iterations of training, train error decreases.
   This result on its own is exciting; deep RL techniques are notoriously unstable, yet looking at this graph we see stable learning.
   Network architecture has a noticeable impact on error - the two layer fully-connected MLP has higher error after the same number of iterations as the shallow CNN (MiniVGG) or deep CNN (SENet).
   For a simple game like Tic-Tac-Toe, making our network deeper does not confer a significant advantage over using a shallower network.
 </p>
-
+<h5> Generalized Performance </h5>
 <p>
   So the convolutional networks have lower self-play training error, but we would like to know how well they generalize.
   To test the general strength of each network, we developed a novel benchmark: each agent plays against vanilla MCTS agents of increasing strength and records its win rate.
   Vanilla MCTS agents do not use a deep heuristic; they use the UCT heuristic discussed earlier.
-  After each turn, the number of MCTS iterations used by the opponent doubles, starting from 10 and ending at 20,480.
+  After each turn, the number of MCTS iterations used by the opponent doubles, starting from 10 and ending at 20,480. This allows the agent to use much more time to explore possible moves (a few minutes) before taking a turn.
   In this way, we can compare the relative strengths of the networks against an identical opponent to get a better idea of how well their strategies generalize outside of self-play.
   The performance of these networks against increasingly stronger opponents is plotted below.
 </p>
-<img src="images/ttt_strength.png"/>
 
+<table align="center" style="margin-top:30px; margin-bottom:30px">
+<td>
+<img src="images/ttt_strength.png" align="center"/></td>
+<td>
+<table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
+  <tr><th>Network</th> <th>Average Win Rate</th></tr>
+  <tr><td>None (UCT) (Control)</td> <td>.396</td></tr>
+  <tr><td>MLP</td> <td>.542</td></tr>
+  <tr><td>MiniVGG</td> <td>.667</td></tr>
+  <tr><td>SENet</td> <td>.667</td></tr>
+</table>
+</td>
+</table>
 
 <p>  
   Just like before, the convolutional networks out-perform the MLP network.
-  The convolutional networks have a higher win rate against general opponents,
+  The convolutional networks have a higher average win rate against general opponents,
   suggesting that they learned a stronger heuristic than the fully connected network.
   </p>
 
@@ -268,12 +293,160 @@ These models are quite anemic compared to the 40-layer ResNet used by DeepMind, 
 <p>
   Recall from our hyperparameter discussion that our trained AlphaZero agents use 50 MCTS iterations per turn, guided by a deep heuristic.
   For comparison, we have also plotted a 50-iteration vanilla MCTS agent as a control in black. 
-  At each opponent, our networks meet or beat the win rate of the control, showing that the learned heuristics are meaningful.
+  At each opponent, our networks meet or beat the win rate of the control, showing that the learned heuristics are meaningful and superior to UCT.
 </p>
   
 <p>
   From these results, we see that our deep heuristic makes MCTS wildly more efficient compared to the "dumb" Vanilla MCTS UCT heuristic.
 </p>
+
+<h5> Filter Visualization </h5>
+<p>
+  Here are some visualizations of filters from the first convolutional layer of the Tic-Tac-Toe SENet.
+  Strong red colors at indicate responses to the first player's pieces,
+  and blue colors indicate responses to the second player's pieces.
+  Purplish blends indicate responses to both.
+  The semantic purpose of each filter is not obvious, but we do know
+  these filters are extracting board patterns that are significant to making decisions.
+</p>
+<table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
+    <tr>
+      <td><img src="images/ttt_filter1.png" width=200px/></td>
+      <td><img src="images/ttt_filter2.png" width=200px/></td>
+      <td><img src="images/ttt_filter3.png" width=200px/></td>
+      <td><img src="images/ttt_filter4.png" width=200px/></td>
+    </tr>
+    <tr>
+        <td><img src="images/ttt_filter5.png" width=200px/></td>
+        <td><img src="images/ttt_filter6.png" width=200px/></td>
+        <td><img src="images/ttt_filter7.png" width=200px/></td>
+        <td><img src="images/ttt_filter8.png" width=200px/></td>
+      </tr>
+  </table>
+
+<h5>Human Competitor</h5>
+<p>
+  The true test of an AlphaZero agent is its performance against a competent human opponent.
+  Below is a table of human competitors who played against the Tic-Tac-Toe SENet AlphaZero agent, and the game outcomes.
+  50% of the time the human played first, and 50% of the time the AI played first.
+  Note that these are non-professional players. A win rate of 50% implies that the human is just as strong as the AI.
+</p>
+<table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
+  <tr><th>Human</th> <th>Human Wins</th> <th>Ties</th> <th>Human Losses</th> <th>Human win rate</th> </tr>
+  <tr><td>Maria</td> <td>0</td> <td>6</td> <td>4</td> <td>30%</td></tr>
+</table>
+  
+<br>
+<h2>Experiments and Results: Connect 4</h2>
+<h5>About Connect 4</h5>
+<p>
+  From Wikipedia:
+  "Connect 4 is a two-player connection game in which the players first choose a color and then take turns dropping one colored disc from the top into a seven-column, six-row vertically suspended grid. The pieces fall straight down, occupying the lowest available space within the column. The objective of the game is to be the first to form a horizontal, vertical, or diagonal line of four of one's own discs. Connect Four is a solved game. The first player can always win by playing the right moves"
+</p>
+
+<h5> Training Error </h5>
+<p>
+  As with Tic-Tac-Toe, we can use training loss to gauge how well the networks learned from self-play data.
+</p>
+<center><img src="images/c4_error.png"></center>
+
+<p>
+  Unlike with Tic-Tac-Toe, not all of our loss curves decrease over iterations.
+  Now, only the deep network appears to stably decrease, while the shallow MLP and CNN actually have increasing training error over iterations.
+  We have a few theories as to why this is happening:
+  </p>
+  <ul>
+    <li>Model capacity is too small. The shallow networks are too simple to capture the complexity of Connect 4 play. Adding more parameters and layers might improve performance, as we see with SENet.</li>
+    <li>Learning rate is too high. SENet uses batch normalization, while the other networks do not, potentially enabling it to train with a higher learning rate than the other networks.</li>
+  </ul>
+  <p>
+  Verifying these hypotheses requires more experimentation and is left as future work.
+</p>
+<h5> Generalized Performance </h5>
+<p>
+  The SENet has the lowest self-play training error, but we would like to know how well it generalizes compared to the other networks.
+  To test the general strength of each network, we developed a novel benchmark: each agent plays against vanilla MCTS agents of increasing strength and records its win rate.
+  We use the same methodology as with Tic-Tac-Toe to test how well the agent generalizes.
+  The performance of these networks against increasingly stronger opponents is plotted below.
+</p>
+
+<table align="center" style="margin-top:30px; margin-bottom:30px">
+<td>
+<img src="images/c4_strength.png" align="center"/></td>
+<td>
+<table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
+  <tr><th>Network</th> <th>Average Win Rate</th></tr>
+  <tr><td>None (UCT) (Control)</td> <td>.292</td></tr>
+  <tr><td>MLP</td> <td>.771</td></tr>
+  <tr><td>MiniVGG</td> <td>.75</td></tr>
+  <tr><td>SENet</td> <td>.771</td></tr>
+</table>
+</td>
+</table>
+
+<p>
+  Again, as you might expect, as opponent strength increases, AlphaZero's win rate starts to decrease.
+  But unlike with Tic-Tac-Toe, we do not appear to converge to an optimal solution.
+  As mentioned earlier, Connect 4 is a solved game - player 1 can force a win.
+  If both AlphaZero and the benchmark were playing optimally, we would expected win rate to converge to 50% (Win when playing first, lose when playing second, therefore win half the games).
+  But that is not what we are seeing. For each of the networks, our win rate hits 0% - if our Agents were playing optimally, this would never happen.
+</p>
+
+<p>
+  Surprisingly, all networks perform about the same against vanilla MCTS opponents. Despite training error diverging for the shallower networks, they generalize just as well as SENet.
+  This is definitely a surprising result.
+</p>
+
+<p>
+  Again, we plot a 50-iteration vanilla MCTS agent control agent in black for comparison. 
+  At each opponent, our networks meet or beat the win rate of the control.
+  This shows that even though we failed to learn the optimal strategy, we still learned a heuristic that is strictly better than UCT.
+  Even with our current heuristic, if we allow our MCTS to perform more than 50 iterations (800 was used for Go), we will likely converge on optimal play, though we would require more thinking time.
+  Mastery is just a matter learning a smarter heuristic through more training time and hyperparameter tuning.
+</p>
+  
+<h5> Filter Visualization </h5>
+<p>
+  Here are some visualizations of filters from the first convolutional layer of the Connect 4 SENet.
+  Strong red colors at indicate responses to the first player's pieces,
+  and blue colors indicate responses to the second player's pieces.
+  Purplish blends indicate responses to both.
+  The semantic purpose of each filter is not obvious, but we do know
+  these filters are extracting board patterns that are significant to making decisions.
+</p>
+<table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
+    <tr>
+      <td><img src="images/c4_filter1.png" width=200px/></td>
+      <td><img src="images/c4_filter2.png" width=200px/></td>
+      <td><img src="images/c4_filter3.png" width=200px/></td>
+      <td><img src="images/c4_filter4.png" width=200px/></td>
+    </tr>
+    <tr>
+        <td><img src="images/c4_filter5.png" width=200px/></td>
+        <td><img src="images/c4_filter6.png" width=200px/></td>
+        <td><img src="images/c4_filter7.png" width=200px/></td>
+        <td><img src="images/c4_filter8.png" width=200px/></td>
+      </tr>
+  </table>
+
+<h5>Human Competitor</h5>
+<p>
+  The true test of an AlphaZero agent is its performance against a competent human opponent.
+  Below is a table of human competitors who played against the Connect 4 SENet AlphaZero agent, and the game outcomes.
+  50% of the time the human played first, and 50% of the time the AI played first.
+  Note that these are non-professional players. A win rate of 50% implies that the human is just as strong as the AI.
+</p>
+<table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
+  <tr><th>Human</th> <th>Human Wins</th> <th>Ties</th> <th>Human Losses</th> <th>Human win rate</th> </tr>
+  <tr><td>Maria</td> <td>1</td> <td>0</td> <td>5</td> <td>17%</td></tr>
+</table>
+
+
+
+
+
+
+
 
   <hr>
   <footer> 

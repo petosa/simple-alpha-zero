@@ -1,5 +1,7 @@
 
 import os
+import matplotlib.pyplot as plt
+import numpy as np
 from models.smallvgg import SmallVGG
 from models.minivgg import MiniVGG
 from models.mlp import MLP
@@ -75,8 +77,7 @@ def effective_model_power(checkpoint, game, model_class, sims, cuda=False):
         # Play main game
         scores, outcomes = play_match(game, [my_player] + contenders, verbose=False, permute=True)
         score, outcome = scores[my_player], outcomes[my_player]
-        if outcome == "Lose":
-            lost = True
+        #if outcome == "Lose": lost = True
         print("{} <{}>      Opponent strength: {}".format(outcome, round(score, 3), strength), end="")
 
         # Play control game
@@ -88,13 +89,87 @@ def effective_model_power(checkpoint, game, model_class, sims, cuda=False):
         strength *= 2 # Opponent strength doubles every turn
 
 
+def plot_train_loss(game, model_classes, cudas):
+    fig, ax = plt.subplots()
+    min_len = None
+    for cuda, model_class in zip(cudas, model_classes):
+        nn = NeuralNetwork(game, model_class, cuda=cuda)
+        ckpt = nn.list_checkpoints()[-1]
+        _, error = nn.load(ckpt, load_supplementary_data=True)
+        window = 20
+        error = np.convolve(error, np.ones(window), mode="valid")/window
+        min_len = len(error) if min_len is None else min(min_len, len(error))
+        plt.plot(error, label=model_class.__name__)
+
+    plt.title("Training loss for {}".format(game.__class__.__name__))
+    ax.set_xlim(left=0, right=min_len)
+    ax.set_ylabel("Error")
+    ax.set_xlabel("Iteration")
+    plt.legend()
+    plt.show()
+
+
+
+
+
+
 if __name__ == "__main__":
-    checkpoint = 345
+    checkpoint = 775
     game = Connect4()
-    model_class = SENet
-    sims = 100
-    cuda = True
+    model_class = MLP
+    sims = 50
+    cuda = False
     
     #rank_checkpoints(game, model_class, sims, cuda)
     #one_vs_all(checkpoint, game, model_class, sims, cuda)
-    effective_model_power(checkpoint, game, model_class, sims, cuda)
+    #effective_model_power(checkpoint, game, model_class, sims, cuda)
+    #plot_train_loss(game, [MLP, SmallVGG, SENet], [False, False, True])
+
+
+    '''
+    x = [10,20,40,80,160,320,640,1280,2560,5120,10240,20480]
+    control = [1., .5, .5, .25, .25, .25, .25, .25, .25, .25, .5, .5]
+    senet = [1., .75, .75, .75, .75, .75, .75, .5, .5, .5, .5, .5]
+    mini = [1., .75, .75, .75, .75, .75, .75, .5, .5, .5, .5, .5]
+    mlp = [1., .5, .5, .5, .5, .5, .5, .5, .5, .5, .5, .5]
+    print("control", sum(control)/len(control))
+    print("senet", sum(senet)/len(senet))
+    print("mini", sum(mini)/len(mini))
+    print("mlp", sum(mlp)/len(mlp))
+
+    f, ax = plt.subplots()
+    plt.plot(x, control, color="black", label="Vanilla (Control)", linewidth=4)
+    plt.plot(x,senet, label="SENet", linewidth=4)
+    plt.plot(x,mini, linestyle="--", label="MiniVGG", linewidth=4)
+    plt.plot(x,mlp, linestyle=":", label="MLP", linewidth=4)
+    plt.ylabel("AlphaZero Win Rate")
+    plt.xscale("log")
+    plt.xlabel("Opponent Vanilla MCTS Iterations per Turn (Opponent Strength)")
+    plt.legend()
+    ax.set_ylim(ymin=0)
+    plt.title("TicTacToe - AlphaZero vs Vanilla MCTS Opponents")
+    plt.show()
+
+    '''
+    x = [10,20,40,80,160,320,640,1280,2560,5120,10240,20480]
+    control = [1.0, .75, .25, 1.0, .25, 0, .25, 0, 0, 0, 0, 0]
+    senet = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0,.75, .5, 0]
+    small = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,.5,0,0,.5,1]
+    mlp = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,.25,.5,0,.5]
+
+    print("control", sum(control)/len(control))
+    print("senet", sum(senet)/len(senet))
+    print("small", sum(small)/len(small))
+    print("mlp", sum(mlp)/len(mlp))
+    f, ax = plt.subplots()
+    plt.plot(x, control, color="black", label="Vanilla (Control)", linewidth=4)
+    plt.plot(x,senet, label="SENet", linewidth=4)
+    plt.plot(x,small, linestyle="--", label="SmallVGG", linewidth=4)
+    plt.plot(x,mlp, linestyle=":", label="MLP", linewidth=4)
+    plt.ylabel("AlphaZero Win Rate")
+    plt.xscale("log")
+    plt.xlabel("Opponent Vanilla MCTS Iterations per Turn (Opponent Strength)")
+    plt.legend()
+    ax.set_ylim(ymin=0)
+    plt.title("Connect4 - AlphaZero vs Vanilla MCTS Opponents")
+    plt.show()

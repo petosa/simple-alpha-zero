@@ -54,6 +54,7 @@ if __name__ == "__main__":
     from neural_network import NeuralNetwork
     from models.minivgg import MiniVGG
     from models.smallvgg import SmallVGG
+    from models.senet import SENet
     from players.uninformed_mcts_player import UninformedMCTSPlayer
     from players.deep_mcts_player import DeepMCTSPlayer
     from games.connect4 import Connect4
@@ -62,9 +63,9 @@ if __name__ == "__main__":
 
 
     # Change these variable 
-    game = TicTacToe()
-    ckpt = 75
-    nn = NeuralNetwork(game, MiniVGG)
+    game = Connect4()
+    ckpt = 775
+    nn = NeuralNetwork(game, SENet, cuda=True)
     nn.load(ckpt)
     
     # HumanPlayer(game),
@@ -72,5 +73,6 @@ if __name__ == "__main__":
     # DeepMCTSPlayer(game, nn, simulations=50)
     
     players = [HumanPlayer(game), DeepMCTSPlayer(game, nn, simulations=50)]
-    print(play_match(game, players, verbose=True, permute=False))
+    for _ in range(5):
+        print(play_match(game, players, verbose=True, permute=True))
     
