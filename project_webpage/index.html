@@ -44,45 +44,64 @@ One or two sentences describing the approach you took.
 One or two sentences on the main result you obtained. -->
 
 <p> 
-  We were inspired by DeepMind's AlphaZero - a general algorithm that can learn to master a game just from its rules, without any prior knowledge or expert-played games as training data. The AlphaZero algorithm uses a combination of deep neural networks and tree search and is a generalization of the AlphaGo Zero algorithm (used specifically for the game of Go). 
+  We were inspired by DeepMind's AlphaZero - a general algorithm that can learn to master a game just from its rules, without any prior knowledge or expert-played games to learn from. 
+  The AlphaZero algorithm uses a combination of deep convolutional neural networks and tree search, leveraging Monte Carlo Tree Search (MCTS) and a deep learned heuristic in order to traverse through various promising game states.
+  AlphaZero is a generalization of DeepMind's AlphaGo Zero, a self-learning algorithm specifically designed for the game of Go.</p>
+
+<p> 
+  For our project, we implemented the AlphaZero algorithm completely from scratch, and then tested it on small games such as Tic-Tac-Toe and Connect-4. 
+  Additionally, we experiment using a state of the art Squeeze and Excitation Network (SENet) as part our architecture.
+  This is a novel angle, as SENets have not been integrated with AlphaZero in existing literature.
 </p>
 
 <p> 
-  AlphaZero leverages Monte Carlo Tree Search (MCTS) and a deep learning heuristic in order to traverse through various promising game states. For our project, we implemented the AlphaZero algorithm completely from scratch, and then tested it on small games such as Tic-Tac-Toe and Connect-4. 
-</p>
-  
-<p> 
-  Additionally, we experimented by using a state of the art Squeeze and Excitation Network (SENet) as part our architecture. According to the AlphaZero literature, the SENet has not been tested in the architecture before, so this was a novel angle that we took. 
-</p>
-
-<p> 
-  Our results show that our implementation was able to successfully self-learn policies for Tic-Tac-Toe and Connect-4. 
+  Our results show that our implementation is able to successfully self-learn strong policies for Tic-Tac-Toe and Connect-4. 
 </p>
 
 <br>
 <h2> Introduction and Motivation </h2>
 <h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
 <p>
-  Our goal was to independently re-create an implementation of AlphaZero and test it on games like Tic-Tac-Toe and Connect-4. Since the algorithm is generalized, the same algorithm can be plugged into any discrete, deterministic game with perfect information, and should be able to find powerful policies through self-play. Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based solely on its game-play rules. We would not provide the algorithm with any other information such as game trajectories by grandmasters etc.
+  Our goal was to independently re-create an implementation of AlphaZero and test it on games like Tic-Tac-Toe and Connect-4.
+  Additionally, we wanted to evaluate performance across different network architecutres, including the state of the art Squeeze and Excitation Network (SENet).
 </p>
+
+<p>
+   Since the algorithm is generalized, we should be able to plug AlphaZero into any discrete, deterministic game with perfect information and find powerful policies through self-play.
+   Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based solely on its game-play rules - we would not provide the algorithm with any other information such as game trajectories by grandmasters etc.
+
+  </p>
 
 <h4>How is it done today, and what are the limits of current practice?</h4>
 <p>
-  Currently, AlphaZero is at the forefront of systems that can learn by itself (i.e. through self-play) and master highly complex games (such as Chess and Go). Stockfish has also been known to dabble in this field, but their results have not been as impressive as AlphaZero's. In fact, in a match of 100 games, AlphaZero beat Stockfish 64-36, a landslide victory. We do note, however, that there have been doubts about the validity of these claims. AlphaZero's key benefit lies in the fact that it does not require masses of data and can self-learn how to play the game. Combined with the increase in computational power now available, training the network to play a game of choice has almost become straightforward. Nobody has yet been able to replicate the results that DeepMind achieved with AlphaZero.
+  Currently, AlphaZero is at the forefront of systems that can learn by themself (i.e. through self-play) and master highly complex games (such as Chess and Go).
+  AlphaZero's key benefit lies in the fact that it does not any annotated data to learn strong policies. 
+</p><p>
+  The AlphaZero algorithm is straightforward, but nobody has been able to replicate the results that DeepMind achieved on Chess or Go because of the sheer computational power required.
+  This is also our main limitation - we will not be able to exactly replicate DeepMind's results because we do not have Tensor Process Units (TPUs) at our disposal.
+  There are notable community-driven efforts to pool computation for the purposes of independently replicating DeepMind's performance with Go and Chess, namely Leela Zero and Leela Chess Zero, respectively.
+  There are also several groups that have successfully leveraged AlphaZero to learn easier games like Othello.
+  Of the available open source AlphaZero implementations, most are intricate, poorly documented, untested, or designed specifically for use with one game.
+</p>
+<p> 
+  AlphaZero and MCTS are promising new self-play algorithms.
+  Historically, Alpha-Beta Search and the Minimax strategy have been extensively used for machine playing of two-player games.
+  Famously, IBM's Deep Blue program used Alpha-Beta search to defeat world chess champion Gary Kasparov in 1997.
 </p>
 
 <p> 
-  Both Connect-4 and Tic-Tac-Toe are solved games. A solved game is one whose outcome (win, loss or tie) can be accurately determined from any position, assuming that both players play perfectly. In Connect-4, the first player can force a win, as proved in 1988 by James Allen and Victor Allis (independently of each other); while Tic-Tac-Toe is trivially solvable because its game tree is so small. 
-</p>
-
-<p> 
-  All these algorithms exploit some way of going through the game tree of the game they are attempting to learn. AlphaZero uses Monte Carlo Tree Search to traverse the game tree. In the past, Alpha-Beta Search and the Minimax strategy were extensively used. For example, the Deep Blue program was using Alpha-Beta search when it defeated the human world chess champion in 1997. Our main limitation arises due to lack of computational power - we will not be able to exactly replicate DeepMind's results because we do not have Tensor Process Units (TPUs) at our disposal to run our code. 
-</p>
+    Regarding the games we will be learning, both Connect-4 and Tic-Tac-Toe are solved games. A solved game is one whose outcome (win, loss or tie) can be accurately determined from any position, assuming that both players play perfectly. In Connect-4, the first player can force a win, as proved in 1988 by James Allen and Victor Allis (independently of each other); while Tic-Tac-Toe is trivially solvable because its game tree is so small. 
+  </p>
+  
 
 <h4>Who cares? If you are successful, what difference will it make?</h4>
 <p> 
   As mentioned before, our goal was to implement the AlphaZero algorithm from scratch. We believe that our implementation is accessible, modular, and well-tested (as compared to similar implementations of AlphaGo Zero). In the code bank, there is an extensive test bed that can be scaled up (perhaps using TPUs). The modular nature of the code means that it is straightforward to swap out the game being learnt and the network being used to train. Having this set-up provides good headway for future research - testing the potential of different types of deep networks, introducing multi-player etc.
-</p>
+  Our aim is to provide a completely modular AlphaZero testbed for running flexible experiments across any neural network or game you can program.
+  The implementation is clean, simple, and fully tested.</p>
+  <p>
+    Additionally, we can contribute the first documented results of an SENet being used within AlphaZero.
+  </p>
 
 <br>
 <h2> Background </h2>
