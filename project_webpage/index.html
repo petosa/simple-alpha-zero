@@ -30,7 +30,7 @@ color: #FF9900;
 <div class="page-header">
 
 <!-- Title and Name --> 
-<h1>AlphaZero</h1> 
+<h1>AlphaZero from Scratch</h1> 
 <span style="font-size: 20px; line-height: 1.5em;"><strong>Nick Petosa, Robert Keezer, Nupur Chatterji </strong></span><br>
 <span style="font-size: 18px; line-height: 1.5em;">Fall 2018 CS 4803 / 7643 Deep Learning: Class Project</span><br>
 <span style="font-size: 18px; line-height: 1.5em;">Georgia Institute of Technology</span>
@@ -43,9 +43,12 @@ One or two sentences on the motivation behind the problem you are solving.
 One or two sentences describing the approach you took. 
 One or two sentences on the main result you obtained. -->
 
-<p> We were inspired by the work done by DeepMind on AlphaZero - an algorithm developed to play games by simply using the rules of the game, without any prior knowledge or example expert-played games. The AlphaZero algorithm uses a combination of deep neural networks and reinforcement learning and is a generalization of the AlphaGo Zero algorithm (used specifically for the game of Go). </p>
+<p> We were inspired by DeepMind's AlphaZero - a general algorithm that can learn to master a game just from its rules, without any prior knowledge or expert-played games as training data. The AlphaZero algorithm uses a combination of deep neural networks and tree search and is a generalization of the AlphaGo Zero algorithm (used specifically for the game of Go). </p>
 
-<p> AlphaZero leverages the Monte Carlo Tree Search (MCTS) algorithm in order to traverse through various promising game states. We opted to mimic this approach, and test it on smaller games such as Tic-Tac-Toe and Connect 4. Our implementation of AlphaZero was built complete from scratch. </p>
+<p> AlphaZero leverages Monte Carlo Tree Search (MCTS) and a deep learning heuristic in order to traverse through various promising game states.
+  For our project, we implemented AlphaZero completely from scratch, and then tested it on small games such as Tic-Tac-Toe and Connect 4. 
+  
+<p>Additionally, we experiment using a state of the art squeeze-and-excitation network as our architecture, which has not previously been tried in AlphaZero literature. </p>
 
 <p> TO DO: MAIN RESULTS. </p>
 
@@ -240,10 +243,36 @@ These models are quite anemic compared to the 40-layer ResNet used by DeepMind, 
 
 <p>
   So the convolutional networks have lower self-play training error, but we would like to know how well they generalize.
-  To test the strength of each network, we developed a novel benchmark: each agent plays against vanilla MCTS agents of increasing strength until they are defeated.
-  Specifically, the number of MCTS iterations per turn doubles with each consecutive opponent.
-  In this way, we can compare the relative strengths of the networks and get a better idea of how well their strategies generalize outside of self-play.
+  To test the general strength of each network, we developed a novel benchmark: each agent plays against vanilla MCTS agents of increasing strength and records its win rate.
+  Vanilla MCTS agents do not use a deep heuristic; they use the UCT heuristic discussed earlier.
+  After each turn, the number of MCTS iterations used by the opponent doubles, starting from 10 and ending at 20,480.
+  In this way, we can compare the relative strengths of the networks against an identical opponent to get a better idea of how well their strategies generalize outside of self-play.
+  The performance of these networks against increasingly stronger opponents is plotted below.
+</p>
+<img src="images/ttt_strength.png"/>
+
+
+<p>  
+  Just like before, the convolutional networks out-perform the MLP network.
+  The convolutional networks have a higher win rate against general opponents,
+  suggesting that they learned a stronger heuristic than the fully connected network.
+  </p>
+
+
+<p>
+  As you might expect, as opponent strength increases, AlphaZero's win rate starts to decrease.
+  Win rate converges to 50, which makes sense since optimal Tic-Tac-Toe play is known to end in a tie.
+  All of our networks seemed to learn how to force a tie, though the convolutional networks also learned how to exploit weaker opponents and pull off more wins.
+</p>
+
+<p>
+  Recall from our hyperparameter discussion that our trained AlphaZero agents use 50 MCTS iterations per turn, guided by a deep heuristic.
+  For comparison, we have also plotted a 50-iteration vanilla MCTS agent as a control in black. 
+  At each opponent, our networks meet or beat the win rate of the control, showing that the learned heuristics are meaningful.
+</p>
   
+<p>
+  From these results, we see that our deep heuristic makes MCTS wildly more efficient compared to the "dumb" Vanilla MCTS UCT heuristic.
 </p>
 
   <hr>
