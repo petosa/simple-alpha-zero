@@ -43,13 +43,65 @@ One or two sentences on the motivation behind the problem you are solving.
 One or two sentences describing the approach you took. 
 One or two sentences on the main result you obtained. -->
 
-<p> We were inspired by DeepMind's AlphaZero - a general algorithm that can learn to master a game just from its rules, without any prior knowledge or expert-played games as training data. The AlphaZero algorithm uses a combination of deep neural networks and tree search and is a generalization of the AlphaGo Zero algorithm (used specifically for the game of Go). </p>
+<p> 
+  We were inspired by DeepMind's AlphaZero - a general algorithm that can learn to master a game just from its rules, without any prior knowledge or expert-played games as training data. The AlphaZero algorithm uses a combination of deep neural networks and tree search and is a generalization of the AlphaGo Zero algorithm (used specifically for the game of Go). 
+</p>
 
-<p> AlphaZero leverages Monte Carlo Tree Search (MCTS) and a deep learning heuristic in order to traverse through various promising game states. For our project, we implemented the AlphaZero algorithm completely from scratch, and then tested it on small games such as Tic-Tac-Toe and Connect 4. 
+<p> 
+  AlphaZero leverages Monte Carlo Tree Search (MCTS) and a deep learning heuristic in order to traverse through various promising game states. For our project, we implemented the AlphaZero algorithm completely from scratch, and then tested it on small games such as Tic-Tac-Toe and Connect 4. 
+</p>
   
-<p> Additionally, we experimented by using a state of the art Squeeze and Excitation Network (SENet) as part our architecture. According to the AlphaZero literature, the SENet has not been tested in the architecture before, so this was a novel angle that we took. </p>
+<p> 
+  Additionally, we experimented by using a state of the art Squeeze and Excitation Network (SENet) as part our architecture. According to the AlphaZero literature, the SENet has not been tested in the architecture before, so this was a novel angle that we took. 
+</p>
 
-<p> Our results show that our implementation was able to successfully self-learn policies for Tic-Tac-Toe and Connect 4. </p>
+<p> 
+  Our results show that our implementation was able to successfully self-learn policies for Tic-Tac-Toe and Connect 4. 
+</p>
+
+<br>
+<h2> Introduction and Motivation </h2>
+<h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
+<p>
+  Our goal was to independently replicate the implementation of AlphaZero and test it on games such as Tic-Tac-Toe and Connect-4. Since the algorithm is generalized, the same algorithm can be plugged into any discrete, deterministic game with perfect information, and should be able to find powerful policies through self-play. Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based solely on its game-play rules. We would not provide the algorithm with any other information such as game trajectories by grandmasters etc.
+</p>
+
+<h4>How is it done today, and what are the limits of current practice?</h4>
+<p>
+  Currently, AlphaZero is at the forefront of systems that can learn by itself (i.e. through self-play) and master highly complex games (such as Chess and Go). Stockfish has also been known to dabble in this field, but their results have not been as impressive as AlphaZero. In fact, in a match of 100 games, AlphaZero beat Stockfish 64-36, a landslide victory. We do note though that there have been doubts about the validity of these claims. AlphaZero's key benefit lies in the fact that it does not require masses of data and can self-learn how to play the game. Combined with the increase in computational power now available, training the network to play a game of choice has almost become straightforward. Nobody has yet been able to replicate the results that DeepMind achieved.
+</p>
+
+<p> 
+  Both Connect-4 and Tic-Tac-Toe are solved games. A solved game is one whose outcome (win, loss or tie) can be accurated determined from any position, assuming that both players play perfectly. In Connect-4, the first player can force a win, as proved in 1988; while Tic-Tac-Toe is trivially solvable because its game tree is so small. 
+</p>
+
+<p> 
+  All these algorithms exploit some way of going through the game tree of the game they are attempting to learn. AlphaZero uses Monte Carlo Tree Search to traverse the game tree. In the past, Alpha-Beta Search and the Minimax strategy were extensively used. For example, the Deep Blue program was using Alpha-Beta search when it defeated the human world chess champion in 1997. Our main limitation arises due to lack of computation power - we will not be able to exactly replicate DeepMind's results because we do not have TPUs at our disposal to run our code. 
+</p>
+
+<h4>Who cares? If you are successful, what difference will it make?</h4>
+<p> 
+  As mentioned before, our goal was to implement the AlphaZero algorithm from scratch. We believe that our implementation is accessible, modular, and well-tested (as compared to similar implementations of AlphaGo Zero). In the code bank, there is an extensive test bed that can be scaled up (perhaps using TPUs). The modular nature of the software means that it is straightforward to swap out the game being learnt and the network being used to train. Having this set up will also provide good headway for future research - testing different types of deep networks, introducing multi-player etc.
+</p>
+
+<br>
+<h2> Background </h2>
+<h4> Monte Carlo Tree Search (MCTS) </h4>
+<p> 
+  At the heart of the AlphaZero algorithm is Monte Carlo Tree Search (MCTS) - a tree searching methodology used for policy improvement and competitive play. To understand how AlphaZero innovates on MCTS, it is important to first understand how vanilla MCTS works. 
+</p>
+
+<p> 
+  MCTS was developed in 2006 by Remi Coulom as a domain-independent game tree search algorithm.  MCTS works with games that are discrete, deterministic and have perfect information - this means that they must have distinct moves and positions, have fixed outcomes for each move, players must compete against one another but can see everything that happens. 
+</p>
+
+<p> 
+  The search tree always begins by expanding the game's starting state s<sub>init</sub>, by considering every possible action. For a game like Tic-Tac-Toe this initial state would be an empty 3 by 3 board, and a possible action would be placing an X in the center slot. The diagram below shows how this first step works for a state further down the Tic-Tac-Toe game tree. 
+</p>
+
+<p> 
+  The essence of the vanilla MCTS algorithm is quite simple - a search tree is iteratively built, node by node, according to the outcomes of simulated playouts. In each iteration, a series of Selection, Expansion, Simulation, and Backpropagation steps occur. This helps to grow the game tree and help us better understand our game. Each edge of the search tree maintains a set of statistics - the value of a move (W), and the number of times that move was taken (N).
+</p>
 
 <br><br>
 <!-- Main Illustrative Figure --> 
@@ -59,114 +111,119 @@ One or two sentences on the main result you obtained. -->
 </div>
 <br><br>
 
-<h2> Introduction and Motivation </h2>
-<h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
-<p>Our goal was to independently replicate the implementation of AlphaZero and test it on games such as Tic-Tac-Toe and Connect-4. Since the algorithm is generalized, the same algorithm can be plugged into any discrete, deterministic game with perfect information, and should be able to find powerful policies through self-play. Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based solely on its game-play rules. We would not provide the algorithm with any other information such as game trajectories by grandmasters etc.</p>
-
-<h4>How is it done today, and what are the limits of current practice?</h4>
-<p>Currently, AlphaZero is at the forefront of systems that can learn by itself (i.e. through self-play) and master highly complex games (such as Chess and Go). Stockfish has also been known to dabble in this field, but their results have not been as impressive as AlphaZero. In fact, in a match of 100 games, AlphaZero beat Stockfish 64-36, a landslide victory. We do note though that there have been doubts about the validity of these claims. AlphaZero's key benefit lies in the fact that it does not require masses of data and can self-learn how to play the game. Combined with the increase in computational power now available, training the network to play a game of choice has almost become straightforward. Nobody has yet been able to replicate the results that DeepMind achieved. </p>
-
-<p> Both Connect-4 and Tic-Tac-Toe are solved games. A solved game is one whose outcome (win, loss or tie) can be accurated determined from any position, assuming that both players play perfectly. In Connect-4, the first player can force a win, as proved in 1988; while Tic-Tac-Toe is trivially solvable because its game tree is so small. </p>
-
-<p> All these algorithms exploit some way of going through the game tree of the game they are attempting to learn. AlphaZero uses Monte Carlo Tree Search to traverse the game tree. In the past, Alpha-Beta Search and the Minimax strategy were extensively used. For example, the Deep Blue program was using Alpha-Beta search when it defeated the human world chess champion in 1997. Our main limitation arises due to lack of computation power - we will not be able to exactly replicate DeepMind's results because we do not have TPUs at our disposal to run our code. </p>
-
-<h4>Who cares? If you are successful, what difference will it make?</h4>
-<p> As mentioned before, our goal was to implement the AlphaZero algorithm from scratch. We believe that our implementation is accessible, modular, and well-tested (as compared to similar implementations of AlphaGo Zero). In the code bank, there is an extensive test bed that can be scaled up (perhaps using TPUs). The modular nature of the software means that it is straightforward to swap out the game being learnt and the network being used to train. Having this set up will also provide good headway for future research - testing different types of deep networks, introducing multi-player etc.</p>
-
-<br><br><!-- 
-<div style="text-align: center;">
-<img style="height: 300px;" alt="" src="images/mcts1.png">
-</div>
-<br><br>
- -->
-<br><br>
-<h2> Background </h2>
-<h4> Monte Carlo Tree Search (MCTS) </h4>
-<p> At the heart of the AlphaZero algorithm is Monte Carlo Tree Search (MCTS) - a tree searching methodology used for policy improvement and competitive play. To understand how AlphaZero innovates on MCTS, it is important to first understand how vanilla MCTS works. </p>
-
-<p> MCTS was developed in 2006 by Remi Coulom as a domain-independent game tree search algorithm.  MCTS works with games that are discrete, deterministic and have perfect information - this means that they must have distinct moves and positions, have fixed outcomes for each move, players must compete against one another but can see everything that happens. </p>
-
-<p> The search tree always begins by expanding the game's starting state s<sub>init</sub>, by considering every possible action. For a game like Tic-Tac-Toe this initial state would be an empty 3 by 3 board, and a possible action would be placing an X in the center slot. The diagram below shows how this first step works for a state further down the Tic-Tac-Toe game tree. </p>
-
-<p> The essence of the vanilla MCTS algorithm is quite simple - a search tree is iteratively built, node by node, according to the outcomes of simulated playouts. In each iteration, a series of Selection, Expansion, Simulation, and Backpropagation steps occur. This helps to grow the game tree and help us better understand our game. Each edge of the search tree maintains a set of statistics - the value of a move (W), and the number of times that move was taken (N). </p>
-
 <ol>
   <li>
-    <p> The first step of each iteration is Selection. During selection, we crawl down our tree, choosing nodes based off a simple exploration/exploitation heuristic. The Selection phase stops once we hit a leaf in our search tree. This leaf is what get "Selected". </p>
+    <p> 
+      The first step of each iteration is Selection. During selection, we crawl down our tree, choosing nodes based off a simple exploration/exploitation heuristic. The Selection phase stops once we hit a leaf in our search tree. This leaf is what get "Selected".
+    </p>
 
-    <p> The main challenge during Selection is maintaining a balance between the exploitation of moves we have found to be valuable and exploration of moves with relatively few simulations. The upper confidence tree (UCT) score is a popular MCTS heuristic that uses the edge statistics to trade off exploitation (the first term) with exploration (the second term). </p>
+    <p> 
+      The main challenge during Selection is maintaining a balance between the exploitation of moves we have found to be valuable and exploration of moves with relatively few simulations. The upper confidence tree (UCT) score is a popular MCTS heuristic that uses the edge statistics to trade off exploitation (the first term) with exploration (the second term). 
+    </p>
 
-    <p> We have a free parameter here c. Having a low value for c will encourage the algorithm to choose nodes with a high value W (exploit), while a low c value will encourage the search to pick nodes with a low visited count N (explore). The value of c is often set empirically. </p>
+    <p> 
+      We have a free parameter here c. Having a low value for c will encourage the algorithm to choose nodes with a high value W (exploit), while a low c value will encourage the search to pick nodes with a low visited count N (explore). The value of c is often set empirically. 
+    </p>
   </li>
 
   <li>
-    <p> The second step of each iteration is Expansion. We want to grow our search tree from the Selected leaf, so we consult our UCT heuristic to determine what action we want to take next. Taking that action puts us in a new board state (i.e. a new node in the tree). If that new state is a terminal state (the game was won/lost/tied), then we do not add it to our tree, otherwise we attach this new state to our originally selected leaf node. </p>
+    <p> 
+      The second step of each iteration is Expansion. We want to grow our search tree from the Selected leaf, so we consult our UCT heuristic to determine what action we want to take next. Taking that action puts us in a new board state (i.e. a new node in the tree). If that new state is a terminal state (the game was won/lost/tied), then we do not add it to our tree, otherwise we attach this new state to our originally selected leaf node. 
+    </p>
   </li>
 
   <li>
-    <p> The third step of each iteration is Simulation. Expansion has put us in some new state, and now we want to estimate its value. We do this using a Monte Carlo playout - we randomly select moves from the expanded state until we reach a terminal state, at which point the game is won, lost, or tied. </p>
+    <p> 
+      The third step of each iteration is Simulation. Expansion has put us in some new state, and now we want to estimate its value. We do this using a Monte Carlo playout - we randomly select moves from the expanded state until we reach a terminal state, at which point the game is won, lost, or tied. 
+    </p>
   </li>
 
   <li>
-    <p> The fourth step of each iteration is Backpropagation. The Monte Carlo playout provides us with some information about the value of our new state, specifically whether we won (+1), lost (-1) or tied (+0) after random play. This outcome is added to the W statistic of each edge we traversed to get to the expanded state. The algorithm keeps track of the current player (and flips the sign of W whenever the players switch). Each N in the path is also incremented to indicate that a particular move was taken. Backpropagation helps inform the heuristic for future iterations. </p>
+    <p> 
+      The fourth step of each iteration is Backpropagation. The Monte Carlo playout provides us with some information about the value of our new state, specifically whether we won (+1), lost (-1) or tied (+0) after random play. This outcome is added to the W statistic of each edge we traversed to get to the expanded state. The algorithm keeps track of the current player (and flips the sign of W whenever the players switch). Each N in the path is also incremented to indicate that a particular move was taken. Backpropagation helps inform the heuristic for future iterations. 
+    </p>
   </li>
 </ol>
 
-<p> The MCTS will continue to run multiple iterations until time runs out. Based on the chosen and tuned parameters, the tree goes through a good balance of expansion and exploration to eventually identify the best move to make. Then in the original game, the first child with the highest N value is picked. We move on to the next game state, which becomes our root node, and repeat the process all over again to find our next best move. </p>
+<p> 
+  The MCTS will continue to run multiple iterations until time runs out. Based on the chosen and tuned parameters, the tree goes through a good balance of expansion and exploration to eventually identify the best move to make. Then in the original game, the first child with the highest N value is picked. We move on to the next game state, which becomes our root node, and repeat the process all over again to find our next best move. 
+</p>
 
 <h4> The Squeeze and Excitation Network (SENet) </h4>
 
-<p> Our implementation of AlphaZero is highly modular. The modularity made it much easier to test different games and novel networks to train. One of the networks we plugged into our system was the Squeeze and Excitation Network (SENet). The introduction of SENets created waves when they were used in the ImageNet competition of 2017, improving the results from the previous year by a staggering 25%. </p>
+<p> 
+  Our implementation of AlphaZero is highly modular. The modularity made it much easier to test different games and novel networks to train. One of the networks we plugged into our system was the Squeeze and Excitation Network (SENet). The introduction of SENets created waves when they were used in the ImageNet competition of 2017, improving the results from the previous year by a staggering 25%. 
+</p>
 
-<p> The main crux of the SENet is that it introduces parameters into each channel of a convolutional block, so that the network can adaptively adjust the weight of each feature map (known as feature recalibration). </p>
+<p> 
+  The main crux of the SENet is that it introduces parameters into each channel of a convolutional block, so that the network can adaptively adjust the weight of each feature map (known as feature recalibration).
+</p>
 
-<p> In general, convolutional neural networks efficiently extract hierarchical information from their filters - in class we have seen that layers closer to the start of the network tend to find low-level features such as edges, while layers towards the end of the network, closer to the loss layer, are attuned to detecting faces or more complex scenes. The spatial and channel information are used in conjunction, and the network equally weights these channels when output maps are being created. </p>
+<p> 
+  In general, convolutional neural networks efficiently extract hierarchical information from their filters - in class we have seen that layers closer to the start of the network tend to find low-level features such as edges, while layers towards the end of the network, closer to the loss layer, are attuned to detecting faces or more complex scenes. The spatial and channel information are used in conjunction, and the network equally weights these channels when output maps are being created. 
+</p>
 
-<p> With the SENet, the aim is to weight each channel adaptively, so that it is more aware of the content. It wants to explicitly model channel interdependencies between its convolutional features. A simple example would be adding one parameter to each channel and linearly scaling it based on how relevant each channel is. </p>
+<p> 
+  With the SENet, the aim is to weight each channel adaptively, so that it is more aware of the content. It wants to explicitly model channel interdependencies between its convolutional features. A simple example would be adding one parameter to each channel and linearly scaling it based on how relevant each channel is. 
+</p>
 
-<p> In reality, the process is a little more complicated. A holistic understanding of each channel is garnered by squeezing the feature maps into a single value (by average pooling). This process gives rise to a vector whose size is equal to the number of original convolutional channels. This vector is passed through a two-layer neural network and a sigmoid, creating a vector of the same size. The contents of this output vector are used as the weights of the original feature maps (they are now scaled based on relevance). </p>
+<p> 
+  In reality, the process is a little more complicated. A holistic understanding of each channel is garnered by squeezing the feature maps into a single value (by average pooling). This process gives rise to a vector whose size is equal to the number of original convolutional channels. This vector is passed through a two-layer neural network and a sigmoid, creating a vector of the same size. The contents of this output vector are used as the weights of the original feature maps (they are now scaled based on relevance).
+</p>
 
-<p> A SENet is then created by stacking multiple of these layers (now called an SE Block) on top of each other. </p>
+<p> 
+  A SENet is then created by stacking multiple of these layers (now called an SE Block) on top of each other.
+</p>
 
+<h4> AlphaGo Zero and AlphaZero </h4>
+<p> TO COMPLETE </p>
+
+<br>
 <h2>Approach</h2>
 <h4>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</h4>
+<p> 
+  We implemented AlphaZero from scratch and used it train an agent to master Tic-Tac-Toe and Connect-4. Our implementation was programmed using Python, Numpy, and Pytorch. We believed that we would be able to succeed because both games have a relatively small branching factors and fewer game states compared to a game like Go. Since the algorithm is generalizable, AlphaZero can be applied to many games. We directly compare the performance of the algorithm across three different network architectures. 
+</p>
 
-We implemented AlphaZero from scratch and used it train an agent to master Tic-Tac-Toe and Connect 4. Our implementation is done using python, numpy, and pytorch.
-We believed that we would be able to succeed because both games have a relatively small branching factor and number of game states compared to a game like Go.
-and the AlphaZero algorithms purports to be generalizable to different games. We directly compare the performance of the algorithm across three different network architectures.<br>
 TO DO: Mention multi-player support.
 
 <h4>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</h4>
+<p> 
+  One problem we anticipated was computation time. From the AlphaZero paper, training an agent to play Go took just 8 hours to master the game - but required over 5000 TPUs.
+  The only resource we had access to was a GTX 1070 in a desktop machine running Ubuntu.
+  It would take approximately 22 years to replicate DeepMind's Go program on our hardware.
+  It was important to limit the scope of this project to something feasible with our hardware by picking a simpler game.
+  Training a Tic-Tac-Toe agent was our immediate goal, and training a Connect 4 agent was our reach goal.
+  Go has has an average branching factor 250 and about 2*10<sup>170</sup> game states.
+  Compare that to the simplicity of the other games:
+  Tic-Tac-Toe has a maximum branching factor of 9 and about 5000 game states, and Connect 4 has a maximum branching factor of 6 and about 4.5 trillion game states. </p>
 
-One problem we anticipated was computation time. From the AlphaZero paper, training an agent to play Go took just 8 hours to master the game - but required over 5000 TPUs.
-The only resource we had access to was a GTX 1070 in a desktop machine running Ubuntu.
-It would take approximately 22 years to replicate DeepMind's Go program on our hardware.
-It was important to limit the scope of this project to something feasible with our hardware by picking a simpler game.
-Training a Tic-Tac-Toe agent was our immediate goal, and training a Connect 4 agent was our reach goal.
-Go has has an average branching factor 250 and about 2*10<sup>170</sup> game states.
-Compare that to the simplicity of the other games:
-Tic-Tac-Toe has a maximum branching factor of 9 and about 5000 game states, and Connect 4 has a maximum branching factor of 6 and about 4.5 trillion game states.
-<br><br>
-Another problem we anticipated was the complexity of implementing AlphaZero from scratch.
-There are many intricate components like MCTS that are bug-prone.
-If any component was bugged, the entire AlphaZero pipeline would fail.
-To couteract this, we wrote extensive unit tests for all components during development.
-In total, we created 31 tests for our implementation.
-<br><br>
-An unanticipated problem that we encountered was AlphaZero's sensitivity to certain hyperparameters.
+<p> 
+  Another problem we anticipated was the complexity of implementing AlphaZero from scratch.
+  There are many intricate components like MCTS that are bug-prone.
+  If any component was bugged, the entire AlphaZero pipeline would fail.
+  To couteract this, we wrote extensive unit tests for all components during development.
+  In total, we created 31 tests for our implementation.
+</p>
 
-AlphaZero works by generating games of self-play as training data, and then updating its network based off that experience.
-One tricky hyperparameter we had to tune was the number of self-play examples generated per network.
-The AlphaZero paper offered no guidance on this value, so we initially started it at 1 - that is, 1 game generated per network.
-We found that at this frequency learning was unstable - policies would change drastically between subsequent networks, impairing learning.
-After some experimenting, we found that generating at least 30 training data games per iteration enabled stable learning.
+<p> 
+  An unanticipated problem that we encountered was AlphaZero's sensitivity to certain hyperparameters.
+
+  AlphaZero works by generating games of self-play as training data, and then updating its network based off that experience.
+  One tricky hyperparameter we had to tune was the number of self-play examples generated per network.
+  The AlphaZero paper offered no guidance on this value, so we initially started it at 1 - that is, 1 game generated per network.
+  We found that at this frequency learning was unstable - policies would change drastically between subsequent networks, impairing learning.
+  After some experimenting, we found that generating at least 30 training data games per iteration enabled stable learning.
+</p>
 
 <h4>Hyperparameters</h4>
-One of the attractive qualities of the AlphaZero paper is that DeepMind used the same hyperparameters across each game they trained it on.
-Similarly, after much trial and error, we arrived at a set of hyperparameters that worked well across different games and networks.
-Experimenting with different hyperparameters is expensive because AlphaZero takes a long time to train, so once we discovered a set of hyperparameters that yielded good performance across many games and networks we stopped tweaking.
+<p> 
+  One of the attractive qualities of the AlphaZero paper is that DeepMind used the same hyperparameters across each game they trained it on.
+  Similarly, after much trial and error, we arrived at a set of hyperparameters that worked well across different games and networks.
+  Experimenting with different hyperparameters is expensive because AlphaZero takes a long time to train, so once we discovered a set of hyperparameters that yielded good performance across many games and networks we stopped tweaking.
+</p>
 
-<br><br>
+<br>
 Algorithm parameters
 <ul>
   <li>Number of self-play games generated per network: 30</li>
@@ -182,18 +239,21 @@ Network parameters
   <li>Batch size: 64 (2048 in AlphaZero paper)</li>
   <li>L2 regularization: 1e-4 (Same as AlphaZero paper)</li>
 </ul>
+<br>
 
-To avoid overfitting, L2 regularization is set to 1e-4 as suggested in the AlphaZero paper.
-Generalization is important for this task because the network will only see a small subset of all possible boards during training.
-Generalization empowers the network to have a good sense as to whether a novel state encountered during play is promising, which is useful if the game enters unknown territory.
+<p> 
+  To avoid overfitting, L2 regularization is set to 1e-4 as suggested in the AlphaZero paper.
+  Generalization is important for this task because the network will only see a small subset of all possible boards during training.
+  Generalization empowers the network to have a good sense as to whether a novel state encountered during play is promising, which is useful if the game enters unknown territory.
+</p>
 
-<br><br>
+<br>
 <h2>Experiments and Results</h2>
 <h4>How did you measure success? What experiments were used? What were the results, both quantitative and qualitative? Did you succeed? Did you fail? Why?</h4>
 <p>
-Since we experimented with two separate games, we will report the results for both games separately. 
-Overall, our implementation of AlphaZero was successful with both games.
-We experimented with three different network architectures, described below.
+  Since we experimented with two separate games, we will report the results for both games separately. 
+  Overall, our implementation of AlphaZero was successful with both games.
+  We experimented with three different network architectures, described below.
 </p>
 <table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
   <tr>
@@ -210,7 +270,7 @@ We experimented with three different network architectures, described below.
   </tr>
 </table>
 <p>
-These models are quite anemic compared to the 40-layer ResNet used by DeepMind, but our hope was that simpler games could be learned with simpler models.
+  These models are quite anemic compared to the 40-layer ResNet used by DeepMind, but our hope was that simpler games could be learned with simpler models.
 </p>
 <h5> Tic-Tac-Toe </h5>
 <p>
@@ -238,13 +298,11 @@ These models are quite anemic compared to the 40-layer ResNet used by DeepMind, 
 </p>
 <img src="images/ttt_strength.png"/>
 
-
 <p>  
   Just like before, the convolutional networks out-perform the MLP network.
   The convolutional networks have a higher win rate against general opponents,
   suggesting that they learned a stronger heuristic than the fully connected network.
-  </p>
-
+</p>
 
 <p>
   As you might expect, as opponent strength increases, AlphaZero's win rate starts to decrease.
