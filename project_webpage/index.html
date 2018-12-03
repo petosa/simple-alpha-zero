@@ -75,7 +75,7 @@ One or two sentences on the main result you obtained. -->
 <h4>How is it done today, and what are the limits of current practice?</h4>
 <p>
   Currently, AlphaZero is at the forefront of systems that can learn by themself (i.e. through self-play) and master highly complex games (such as Chess and Go).
-  AlphaZero's key benefit lies in the fact that it does not any annotated data to learn strong policies. 
+  AlphaZero's key benefit lies in the fact that it does not use any annotated data to learn strong policies. 
 </p><p>
   The AlphaZero algorithm is straightforward, but nobody has been able to replicate the results that DeepMind achieved on Chess or Go because of the sheer computational power required.
   This is also our main limitation - we will not be able to exactly replicate DeepMind's results because we do not have Tensor Process Units (TPUs) at our disposal.
@@ -86,32 +86,38 @@ One or two sentences on the main result you obtained. -->
 <p> 
   AlphaZero and MCTS are promising new self-play algorithms.
   Historically, Alpha-Beta Search and the Minimax strategy have been extensively used for machine playing of two-player games.
-  Famously, IBM's Deep Blue program used Alpha-Beta search to defeat world chess champion Gary Kasparov in 1997.
+  Famously, IBM's Deep Blue program used Alpha-Beta search to defeat world chess champion Garry Kasparov in 1997.
 </p>
 
 <p> 
-    Regarding the games we will be learning, both Connect-4 and Tic-Tac-Toe are solved games. A solved game is one whose outcome (win, loss or tie) can be accurately determined from any position, assuming that both players play perfectly. In Connect-4, the first player can force a win, as proved in 1988 by James Allen and Victor Allis (independently of each other); while Tic-Tac-Toe is trivially solvable because its game tree is so small. 
+    Regarding the games we will be learning, both Connect-4 and Tic-Tac-Toe are solved games. A solved game is one whose outcome (win, loss or tie) can be accurately determined from any position, assuming that both players play perfectly. In Connect-4, the first player can force a win, as proved in 1988 by James Allen and Victor Allis (independently of each other); while Tic-Tac-Toe is trivially solvable because its game tree is relatively small. 
   </p>
   
 
 <h4>Who cares? If you are successful, what difference will it make?</h4>
+
 <p> 
-  As mentioned before, our goal was to implement the AlphaZero algorithm from scratch. We believe that our implementation is accessible, modular, and well-tested (as compared to similar implementations of AlphaGo Zero). In the code bank, there is an extensive test bed that can be scaled up (perhaps using TPUs). The modular nature of the code means that it is straightforward to swap out the game being learnt and the network being used to train. Having this set-up provides good headway for future research - testing the potential of different types of deep networks, introducing multi-player etc.
-  Our aim is to provide a completely modular AlphaZero testbed for running flexible experiments across any neural network or game you can program.
-  The implementation is clean, simple, and fully tested.</p>
+  Our aim is to implement from scratch a simple, fully-tested, and modular AlphaZero environment.
+  We intend this setup to provide good headway for future AlphaZero research, like testing the potential of different types of deep networks, introducing multi-player games, etc.
+  In the code bank, there is an extensive test bed that can be scaled up (perhaps using TPUs),
+  and the modular nature of the code means that it is straightforward to swap out the game being learnt and the network being used to train. 
+  </p>
   <p>
     Additionally, we can contribute the first documented results of an SENet being used within AlphaZero.
+    We hope that our results with SENet will be exciting and encourage other researchers to integrate squeeze-and-excitation into a new generation of AlphaZero agents.
   </p>
 
 <br>
 <h2> Background </h2>
 <h4> Monte Carlo Tree Search (MCTS) </h4>
 <p> 
-  At the heart of the AlphaZero algorithm is Monte Carlo Tree Search (MCTS) - a tree searching methodology used for policy improvement and competitive play. To understand how AlphaZero innovates on MCTS, it is important to first understand how vanilla MCTS works. 
+  At the heart of the AlphaZero algorithm is Monte Carlo Tree Search (MCTS) - a tree searching methodology used to determine the best move to make from the given board state. To understand how AlphaZero innovates on MCTS, it is important to first understand how vanilla MCTS works. 
 </p>
 
 <p> 
-  MCTS was developed in 2006 by Remi Coulom as a domain-independent game tree search algorithm.  MCTS works with games that are discrete, deterministic and have perfect information - this means that they must have distinct moves and positions, have fixed outcomes for each move, players must compete against one another but can see everything that happens. 
+  MCTS was developed in 2006 by Remi Coulom as a domain-independent policy search algorithm. 
+  MCTS works with games that are discrete, deterministic and have perfect information - this means that they must have distinct moves and positions, have fixed outcomes for each move, and players must compete against one another but can see everything that happens. 
+  Examples include Chess, Checkers, Go, Tic-Tac-Toe, Connect-4, and many other board games.
 </p>
 
 <br><br>
@@ -121,24 +127,54 @@ One or two sentences on the main result you obtained. -->
 <br><br>
 
 <p> 
-  The essence of the vanilla MCTS algorithm is quite simple - a search tree is iteratively built, node by node, according to the outcomes of simulated playouts. In each iteration, a series of Selection, Expansion, Simulation, and Backpropagation steps occur. This helps to grow the game tree and allows us to better understand our game. Each edge of the search tree maintains a set of statistics - the value of a move (W), and the number of times that move was taken (N).
+  The MCTS API: given the current state of a game board, MCTS returns a distribution over actions indicating which moves are most likely to result in a win.
+  To do this, MCTS iteratively builds a search tree node by node, starting from the current board state. In this tree, nodes are game states and directed edges are legal moves.
+  This construction is done in a way that balances exploration and exploitation.
+  For each edge we maintain W which is the sum of rewards from taking that action, and N which is the number of times we took that action. W and N are accumulated across iterations.
 </p>
+
+<p>
+  
+  After many iterations, we can weight the actions from our current state by the number of times MCTS visited them.
+  The action with the highest visit count has the highest probability of leading us to a win.
+  Below is an example of how this might work from the starting state of Tic-Tac-Toe after 820 iterations.
+</p>
+  
+  <table text-align="center" style="margin-top: 30px; margin-bottom: 30px;">
+    <tr><td align="center"><b>Iteration 0</b></td><td></td><td align="center"><b>Iteration 820</b></td></tr>
+    <tr><td><img src="images/iteration0.png"/></td><td><img src="images/squiggle.png"/></td><td><img src="images/iteration820.png"/></td></tr>
+  </table>
+
+
+  <p>
+  This policy search requires some thinking time - the more iterations you give MCTS, the better its policy will be.
+  In each iteration, a series of Selection, Expansion, Simulation, and Backpropagation steps occur.
+  Each iteration updates the search tree and improves our policy.
+</p>
+
 
 <br><br>
 <div style="text-align: center;">
 <!-- SOURCE: https://www.google.com/url?sa=i&source=images&cd=&cad=rja&uact=8&ved=2ahUKEwj95M6DsvDeAhXpQd8KHWFCDv0QjRx6BAgBEAU&url=https%3A%2F%2Fen.wikipedia.org%2Fwiki%2FMonte_Carlo_tree_search&psig=AOvVaw0x_Q2shAPS29D3Pj6xeL0A&ust=1543264316465916 -->
-<img style="height: 200px;" alt="" src="images/mcts.png">
+<img style="height: 250px;" alt="" src="images/mcts_iterations.png">
 </div>
 <br><br>
+
+<p>
+  So we start at a board state and begin running iterations of MCTS.
+  <b>An interation is made up of the following 4 steps.</b>
+</p>
 
 <ol>
   <li>
     <p> 
-      The first step of each iteration is Selection. During selection, we crawl down our tree, choosing nodes based off a simple exploration/exploitation heuristic. The Selection phase stops once we hit a leaf in our search tree. This leaf is what gets "Selected".
+      <b>Selection.</b> During selection, we crawl down our search tree, choosing nodes based off a simple exploration/exploitation heuristic; the action with the highest heuristic value gets chosen.
+      The Selection phase stops once we hit a leaf node in our search tree. This leaf represents a board state and is what gets "Selected".
     </p>
 
     <p> 
-      In MCTS, the search tree always begins by trivially selecting the game's starting state s<sub>init</sub>, because it is the only node (and hence leaf) in the game tree so far. For a game like Tic-Tac-Toe this initial state would be an empty 3 by 3 board.
+      When MCTS is run on a new game, there will only be one node its search tree to begin with.
+      This node is is the game's starting state s<sub>init</sub>, and because it is the only node (and hence leaf) in the search tree so far, it trivially gets Selected. For a game like Tic-Tac-Toe this initial state would be an empty 3 by 3 board.
     </p>
 
     <br><br>
@@ -148,7 +184,13 @@ One or two sentences on the main result you obtained. -->
     <br><br>
 
     <p> 
-      The main challenge during Selection is maintaining a balance between the exploitation of moves we have found to be valuable and exploration of moves with relatively few simulations. The upper confidence tree (UCT) score is a popular MCTS heuristic that uses the edge statistics (W and N) to trade off exploitation (the first term) with exploration (the second term). The equation for UCT is shown below, where W<sub>i</sub> is the accumulated value of the i<sup>th</sup> child, N<sub>i</sub> is the visit count of the i<sup>th</sup> child and N<sub>p</sub> is the visit count of the parent node.
+        In the above example, we did not have to worry about choosing an action to traverse since the root was a leaf.
+        Typically, we will have to traverse down our search tree to find a leaf, and a heuristic will guide which actions get selected at each level.
+      The main challenge during Selection is maintaining a balance between the exploitation of moves we have found to be valuable and exploration of moves with relatively few simulations. 
+      
+      
+      The upper confidence tree (UCT) score is a popular MCTS heuristic that uses the edge statistics (W and N) to trade off exploitation (the first term of the expression) with exploration (the second term of the expression).
+      The equation for UCT is shown below, where W<sub>i</sub> is the accumulated reward of edge i, N<sub>i</sub> is the visit count of the edge i, and N<sub>p</sub> is the sum of visit counts across all edges sharing a parent with i.
     </p>
 
     <br><br>
@@ -164,42 +206,52 @@ One or two sentences on the main result you obtained. -->
 
   <li>
     <p> 
-      The second step of each iteration is Expansion. We want to grow our search tree from the Selected leaf, so we consult our UCT heuristic to determine what action we want to take next. Taking that action puts us in a new board state (i.e. a new node in the tree). If that new state is a terminal state (the game was won/lost/tied), then we do not add it to our tree, otherwise we attach this new state to our originally selected leaf node. 
+      <b>Expansion</b>. 
+      If our Selected node is not a terminal node (the game was won/lost/tied), then add each of its children to the tree.
+      Again, a child is just a state you can reach through a legal move.
+      
     </p>
 
     <p> 
-      In the case of Tic-Tac-Toe, we would expand our selected node, s<sub>init</sub>. Since there are 9 possible actions that can be taken from this state (9 positions that player X can make a move), and none of these is a terminal state, we add all 9 states to s<sub>init</sub>, as shown below. 
+      In the case of Tic-Tac-Toe, we would expand our selected node, s<sub>init</sub>. Since there are 9 possible actions that can be taken from this state (9 positions that player X can make a move), and s<sub>init</sub> is not a terminal state, we add all 9 states to s<sub>init</sub>, as shown below. 
+      The N and W statistics are shown along each edge, as well as the UCT heuristic H which is computed from N and W.
     </p>
 
     <br><br>
     <div style="text-align: center;">
-    <img style="height: 350px;" alt="" src="images/mcts2.png">
+    <img style="height: 350px;" alt="" src="images/expansion.png">
     </div>
     <br><br>
   </li>
 
   <li>
     <p> 
-      The third step of each iteration is Simulation. Expansion has put us in some new state, and now we want to estimate its value. We do this using a Monte Carlo playout - we randomly select moves from the expanded state until we reach a terminal state, at which point the game is won, lost, or tied. 
+        <b>Simulation.</b> 
+        Expansion opened up a pool of unexplored children, and we would like to associate values with these new actions.
+        The first thing we do is use our heuristic to select which newly created child to simulate. If our heuristic is UCT, this just means picking one at random.
+
+        From this selected child we do a Monte Carlo playout - we randomly select moves until we reach a terminal state, at which point the game is won (+1), lost (-1), or tied (+0). 
+        These simulated moves are not saved anywhere in the tree - they are used strictly for assigning a value to the child.
+        If the selected node was already a terminal node, you can skip this simulation.
     </p>
 
     <p> 
-      For simplicity, let us now consider a state further down the Tic-Tac-Toe game tree. The same steps of Selection, Expansion etc. would have led to this point. So now we consider the tree starting at state s<sub>A</sub>. As before, it is Selected and then Expanded based on the possible actions that can be taken from it.
+      Returning to our Tic-Tac-Toe example, the circled node is the one that gets randomly picked for simulation. 
     </p>
 
     <br><br>
     <div style="text-align: center;">
-    <img style="height: 400px;" alt="" src="images/mcts3.png">
+    <img style="height: 400px;" alt="" src="images/selection.png">
     </div>
     <br><br>
 
     <p> 
-      Now that node s<sub>A</sub> has been Selected and Expanded. We carry out the Simulation step by playing out the game from a leaf node (here we show s<sub>A, 1</sub>) until we reach a terminal state.
+      We now carry out the Simulation step by randomly playing out the game until we reach a terminal state.
     </p>
 
     <br><br>
     <div style="text-align: center;">
-    <img style="height: 200px;" alt="" src="images/mcts4.png">
+    <img style="height: 200px;" alt="" src="images/playout.png">
     </div>
     <br><br>
 
@@ -207,16 +259,18 @@ One or two sentences on the main result you obtained. -->
 
   <li>
     <p> 
-      The fourth step of each iteration is Backpropagation. The Monte Carlo playout provides us with some information about the value of our new state, specifically whether we won (+1), lost (-1) or tied (+0) after random play. This outcome is added to the W statistic of each edge we traversed to get to the expanded state. The algorithm keeps track of the current player (and flips the sign of W whenever the players switch). Each N in the path is also incremented to indicate that a particular move was taken. Backpropagation helps inform the heuristic for future iterations. 
+      <b>Backpropagation.</b> The Monte Carlo playout provides us with information about the new child's value, specifically whether we won (+1), lost (-1) or tied (+0) after random play from that state. This outcome is added to the W statistic of each edge we traversed to get to the expanded state. 
+      The algorithm keeps track of the current player at each level and flips the sign of the reward as needed before adding it to W. Each N along the path is also incremented to indicate each move on the path was explored.
+      And that's it. By updating these statistics, Backpropagation helps inform the heuristic for future iterations. 
     </p>
 
     <p> 
-      As we follow our Tic-Tac-Toe example, we now see the W, N and U values appear along the edges. After the Simulation step, the values are Backpropagated through the trees, and the W, N, and U values of the parents nodes are updated.
+      As we follow our Tic-Tac-Toe example, we now see the W and N values updated, which also updates the heuristic H.
     </p>
 
     <br><br>
     <div style="text-align: center;">
-    <img style="height: 450px;" alt="" src="images/mcts5.png">
+    <img style="height: 450px;" alt="" src="images/backpropagation.png">
     </div>
     <br><br>
 
@@ -224,7 +278,9 @@ One or two sentences on the main result you obtained. -->
 </ol>
 
 <p> 
-  The MCTS will continue to run multiple iterations until time runs out. Based on the chosen and tuned parameters, the tree goes through a good balance of expansion and exploration to eventually identify the best move to make. Then in the original game, the first child with the highest N value is picked. We move on to the next game state, which becomes our root node, and repeat the process all over again to find our next best move. 
+  The MCTS will continue to run multiple iterations of Selection, Expansion, Simulation, and Backpropagation until time runs out and we are left with a policy at our root.
+  At this point we take our turn in the game either by selecting the action that with the highest visit count or by sampling from our policy distribution.
+  We move on to the next game state, which becomes our root node, and repeat MCTS all over again to find our next best move. 
 </p>
 
 <h4> The Squeeze and Excitation Network (SENet) </h4>
@@ -322,8 +378,8 @@ One or two sentences on the main result you obtained. -->
   An unanticipated problem that we encountered was AlphaZero's sensitivity to certain hyperparameters.
 
   AlphaZero works by generating games of self-play as training data, and then updating its network based off that experience.
-  One tricky hyperparameter we had to tune was the number of self-play examples generated per network.
-  The AlphaZero paper offered no guidance on this value, so we initially started it at 1 - that is, 1 game generated per network.
+  One tricky hyperparameter we had to tune was the number of self-play examples generated per network between gradient descent updates.
+  The AlphaZero paper offered no guidance on this value, so we initially started it at 1 - that is, 1 game generated per network followed by an update.
   We found that at this frequency learning was unstable - policies would change drastically between subsequent networks, impairing learning.
   After some experimenting, we found that generating at least 30 training data games per iteration enabled stable learning.
 </p>
