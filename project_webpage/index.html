@@ -49,9 +49,9 @@ One or two sentences on the main result you obtained. -->
   AlphaZero is a generalization of DeepMind's AlphaGo Zero, a self-learning algorithm specifically designed for the game of Go.</p>
 
 <p> 
-  For our project, we implemented the AlphaZero algorithm completely from scratch, and then tested it on small games such as Tic-Tac-Toe and Connect-4. 
-  Additionally, we experiment using a state of the art Squeeze and Excitation Network (SENet) as part our architecture.
-  This is a novel angle, as SENets have not been integrated with AlphaZero in existing literature.
+  For our project, we implemented the AlphaZero algorithm completely from scratch and tested it on small games such as Tic-Tac-Toe and Connect-4. 
+  Additionally, we experimented using a state of the art Squeeze and Excitation Network (SENet) as part our architecture.
+  This is a novel angle, as SENets have not been integrated with AlphaZero according to existing literature.
 </p>
 
 <p> 
@@ -59,34 +59,49 @@ One or two sentences on the main result you obtained. -->
 </p>
 
 <br>
+<table border=1>
+<tr>
+<td>
+<img src="images/ttt.png" width="24%"/>
+<img src="images/chess.jpg"  width="24%"/>
+<img src="images/c4.jpg"  width="24%"/>
+<img src="images/go.jpg"  width="24%"/>
+</td>
+</tr>
+</table>
+
+<br>
 <h2> Introduction and Motivation </h2>
 <h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
 <p>
   Our goal was to independently re-create an implementation of AlphaZero and test it on games like Tic-Tac-Toe and Connect-4.
-  Additionally, we wanted to evaluate performance across different network architecutres, including the state of the art Squeeze and Excitation Network (SENet).
+  We also wanted to evaluate performance across different network architecutres, including the novel Squeeze and Excitation Network (SENet).
 </p>
 
 <p>
    Since the algorithm is generalized, we should be able to plug AlphaZero into any discrete, deterministic game with perfect information and find powerful policies through self-play.
-   Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) the game based solely on its game-play rules - we would not provide the algorithm with any other information such as game trajectories by grandmasters etc.
+   Just like the results of the original paper, we wanted to show that the algorithm would be able to learn how to play (and win!) a game based solely on its game-play rules - we would not provide the algorithm with any other information such as game trajectories by grandmasters etc.
 
   </p>
 
 <h4>How is it done today, and what are the limits of current practice?</h4>
 <p>
-  Currently, AlphaZero is at the forefront of systems that can learn by themself (i.e. through self-play) and master highly complex games (such as Chess and Go).
+  Currently, AlphaZero is at the forefront of systems that can learn by themselves (i.e. through self-play) and master highly complex games (such as Chess and Go).
   AlphaZero's key benefit lies in the fact that it does not use any annotated data to learn strong policies. 
-</p><p>
-  The AlphaZero algorithm is straightforward, but nobody has been able to replicate the results that DeepMind achieved on Chess or Go because of the sheer computational power required.
+</p>
+
+<p>
+  The AlphaZero algorithm is straightforward, but nobody has yet been able to replicate the results that DeepMind achieved on Chess or Go because of the sheer computational power required.
   This is also our main limitation - we will not be able to exactly replicate DeepMind's results because we do not have Tensor Process Units (TPUs) at our disposal.
   There are notable community-driven efforts to pool computation for the purposes of independently replicating DeepMind's performance with Go and Chess, namely Leela Zero and Leela Chess Zero, respectively.
   There are also several groups that have successfully leveraged AlphaZero to learn easier games like Othello.
   Of the available open source AlphaZero implementations, most are intricate, poorly documented, untested, or designed specifically for use with one game.
 </p>
+
 <p> 
   AlphaZero and MCTS are promising new self-play algorithms.
   Historically, Alpha-Beta Search and the Minimax strategy have been extensively used for machine playing of two-player games.
-  Famously, IBM's Deep Blue program used Alpha-Beta search to defeat world chess champion Garry Kasparov in 1997.
+  Famously, IBM's Deep Blue program used Alpha-Beta Search to defeat world chess champion Garry Kasparov in 1997.
 </p>
 
 <p> 
@@ -128,7 +143,7 @@ One or two sentences on the main result you obtained. -->
 
 <p> 
   The MCTS API: given the current state of a game board, MCTS returns a distribution over actions indicating which moves are most likely to result in a win.
-  To do this, MCTS iteratively builds a search tree node by node, starting from the current board state. In this tree, nodes are game states and directed edges are legal moves.
+  To do this, MCTS iteratively builds a search tree node by node, starting from the current board state. In this tree, nodes are game states and directed edges are legal actions.
   This construction is done in a way that balances exploration and exploitation.
   For each edge we maintain W which is the sum of rewards from taking that action, and N which is the number of times we took that action. W and N are accumulated across iterations.
 </p>
@@ -145,11 +160,10 @@ One or two sentences on the main result you obtained. -->
     <tr><td><img src="images/iteration0.png"/></td><td><img src="images/squiggle.png"/></td><td><img src="images/iteration820.png"/></td></tr>
   </table>
 
-
-  <p>
+<p>
   This policy search requires some thinking time - the more iterations you give MCTS, the better its policy will be.
   In each iteration, a series of Selection, Expansion, Simulation, and Backpropagation steps occur.
-  Each iteration updates the search tree and improves our policy.
+  Each iteration updates the search tree and improves the policy.
 </p>
 
 
@@ -174,7 +188,7 @@ One or two sentences on the main result you obtained. -->
 
     <p> 
       When MCTS is run on a new game, there will only be one node its search tree to begin with.
-      This node is is the game's starting state s<sub>init</sub>, and because it is the only node (and hence leaf) in the search tree so far, it trivially gets Selected. For a game like Tic-Tac-Toe this initial state would be an empty 3 by 3 board.
+      This node is the game's starting state s<sub>init</sub>, and because it is the only node (and hence leaf) in the search tree so far, it trivially gets Selected. For a game like Tic-Tac-Toe this initial state would be an empty 3 by 3 board.
     </p>
 
     <br><br>
@@ -184,13 +198,8 @@ One or two sentences on the main result you obtained. -->
     <br><br>
 
     <p> 
-        In the above example, we did not have to worry about choosing an action to traverse since the root was a leaf.
-        Typically, we will have to traverse down our search tree to find a leaf, and a heuristic will guide which actions get selected at each level.
-      The main challenge during Selection is maintaining a balance between the exploitation of moves we have found to be valuable and exploration of moves with relatively few simulations. 
-      
-      
-      The upper confidence tree (UCT) score is a popular MCTS heuristic that uses the edge statistics (W and N) to trade off exploitation (the first term of the expression) with exploration (the second term of the expression).
-      The equation for UCT is shown below, where W<sub>i</sub> is the accumulated reward of edge i, N<sub>i</sub> is the visit count of the edge i, and N<sub>p</sub> is the sum of visit counts across all edges sharing a parent with i.
+        In the above example, we did not have to worry about choosing an action to traverse since the root itself was a leaf.
+        Typically, we will have to traverse down our search tree to find a leaf, and a heuristic will guide which actions get selected at each level. The main challenge during Selection is maintaining a balance between the exploitation of moves we have found to be valuable and exploration of moves with relatively few simulations. The upper confidence tree (UCT) score is a popular MCTS heuristic that uses the edge statistics (W and N) to trade off exploitation (the first term of the expression) with exploration (the second term of the expression). The equation for UCT is shown below, where W<sub>i</sub> is the accumulated reward of edge i, N<sub>i</sub> is the visit count of the edge i, and N<sub>p</sub> is the sum of visit counts across all edges sharing a parent with i.
     </p>
 
     <br><br>
@@ -200,7 +209,7 @@ One or two sentences on the main result you obtained. -->
     <br><br>
 
     <p> 
-      We have a free parameter here c. Having a low value for c will encourage the algorithm to choose nodes with a high value W (exploit), while a low c value will encourage the search to pick nodes with a low visited count N (explore). The value of c is often set empirically. 
+      We have a free parameter here, c. Having a low value for c will encourage the algorithm to choose nodes with a high value W (exploit), while a low c value will encourage the search to pick nodes with a low visited count N (explore). The value of c is often set empirically. 
     </p>
   </li>
 
@@ -214,7 +223,7 @@ One or two sentences on the main result you obtained. -->
 
     <p> 
       In the case of Tic-Tac-Toe, we would expand our selected node, s<sub>init</sub>. Since there are 9 possible actions that can be taken from this state (9 positions that player X can make a move), and s<sub>init</sub> is not a terminal state, we add all 9 states to s<sub>init</sub>, as shown below. 
-      The N and W statistics are shown along each edge, as well as the UCT heuristic H which is computed from N and W.
+      The N and W statistics are shown along each edge, as well as the UCT heuristic (H) which is computed from N and W.
     </p>
 
     <br><br>
@@ -227,7 +236,7 @@ One or two sentences on the main result you obtained. -->
   <li>
     <p> 
         <b>Simulation.</b> 
-        Expansion opened up a pool of unexplored children, and we would like to associate values with these new actions.
+        The Expansion step opened up a pool of unexplored children, and we would like to associate values with these new actions.
         The first thing we do is use our heuristic to select which newly created child to simulate. If our heuristic is UCT, this just means picking one at random.
 
         From this selected child we do a Monte Carlo playout - we randomly select moves until we reach a terminal state, at which point the game is won (+1), lost (-1), or tied (+0). 
@@ -241,12 +250,12 @@ One or two sentences on the main result you obtained. -->
 
     <br><br>
     <div style="text-align: center;">
-    <img style="height: 400px;" alt="" src="images/selection.png">
+    <img style="height: 380px;" alt="" src="images/selection.png">
     </div>
     <br><br>
 
     <p> 
-      We now carry out the Simulation step by randomly playing out the game until we reach a terminal state.
+      We now carry out the Simulation step by randomly playing out the game until we reach a terminal state. It is important to stress that this is a random playout and does not need to be optimal. For example, from the circled node above, one example of random playout might look like this:
     </p>
 
     <br><br>
@@ -261,7 +270,7 @@ One or two sentences on the main result you obtained. -->
     <p> 
       <b>Backpropagation.</b> The Monte Carlo playout provides us with information about the new child's value, specifically whether we won (+1), lost (-1) or tied (+0) after random play from that state. This outcome is added to the W statistic of each edge we traversed to get to the expanded state. 
       The algorithm keeps track of the current player at each level and flips the sign of the reward as needed before adding it to W. Each N along the path is also incremented to indicate each move on the path was explored.
-      And that's it. By updating these statistics, Backpropagation helps inform the heuristic for future iterations. 
+      By updating these statistics, Backpropagation helps inform the heuristic for future iterations. 
     </p>
 
     <p> 
@@ -270,7 +279,7 @@ One or two sentences on the main result you obtained. -->
 
     <br><br>
     <div style="text-align: center;">
-    <img style="height: 450px;" alt="" src="images/backpropagation.png">
+    <img style="height: 380px;" alt="" src="images/backpropagation.png">
     </div>
     <br><br>
 
@@ -302,7 +311,7 @@ One or two sentences on the main result you obtained. -->
 </p>
 
 <p> 
-  In reality, the process is a little more complicated. A holistic understanding of each channel is garnered by squeezing the feature maps into a single value (by Average Pooling). Squeezing (i.e Average Pooling) gives rise to a vector whose size is equal to the number of original convolutional channels. This vector is passed through a two-layer neural network and a sigmoid, creating a vector of the same size. The contents of this output vector are used as the weights of the original feature maps (they are now scaled based on relevance).
+  In reality, the process is a little more complicated. A holistic understanding of each channel is garnered by squeezing the feature maps into a single value (by Average Pooling). Squeezing gives rise to a vector whose size is equal to the number of original convolutional channels. This vector is passed through a two-layer neural network and a sigmoid, creating a vector of the same size. The contents of this output vector are used as the weights of the original feature maps (they are now scaled based on relevance).
 </p>
 
 <p>
