@@ -45,7 +45,7 @@ One or two sentences on the main result you obtained. -->
 
 <p> 
   We were inspired by DeepMind's AlphaZero - a general algorithm that can learn to master a game just from its rules, without any prior knowledge or expert-played games to learn from. 
-  The AlphaZero algorithm uses a combination of deep convolutional neural networks and tree search, leveraging Monte Carlo Tree Search (MCTS) and a deep learned heuristic in order to traverse through various promising game states.
+  The AlphaZero algorithm uses a combination of deep convolutional neural networks and tree search, leveraging Monte Carlo Tree Search (MCTS) and a deep learning heuristic in order to traverse through various promising game states.
   AlphaZero is a generalization of DeepMind's AlphaGo Zero, a self-learning algorithm specifically designed for the game of Go.</p>
 
 <p> 
@@ -75,7 +75,7 @@ One or two sentences on the main result you obtained. -->
 <h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
 <p>
   Our goal was to independently re-create an implementation of AlphaZero and test it on games like Tic-Tac-Toe and Connect-4.
-  We also wanted to evaluate performance across different network architecutres, including the novel Squeeze and Excitation Network (SENet).
+  We also wanted to evaluate performance across different network architectures, including the novel Squeeze and Excitation Network (SENet).
 </p>
 
 <p>
@@ -330,7 +330,7 @@ One or two sentences on the main result you obtained. -->
 </p>
 
 <p>
-  A succient overview of the SENet, by the authors, is shown below.
+  A succent overview of the SENet, by the authors, is shown below.
 </p>
 
 <br><br>
@@ -340,14 +340,65 @@ One or two sentences on the main result you obtained. -->
 </div>
 <br><br>
 
-<h4> AlphaGo Zero and AlphaZero </h4>
+<h4> AlphaZero </h4>
 <p> 
   Vanilla MCTS performs quite well. One of its earliest successes was in Crazy Stone, a Go agent that defeated a professional Go player in 2008, with a small handicap. These results showed that MCTS was a promising direction that could be further pursued.
 </p>
 
 <p>
-  With this knowledge, DeepMind innovated. They augmented the UCT MCTS heuristic with a deep network and policy. They train the parameters of the deep neural network through self-play reinforcement learning. With enough playouts, the UCT score will allow for the exploration of all important game positions in any game and find their values using MCTS. However, by using deep convolutional neural networks, fewer game positions need to be explored (to give rise to similar results), because the network 'learns' the approximate values that positions will have. DeepMind created a really deep neural network architecture, inspired by ResNet (a network that had previously performed really well on the ImageNet challenge and other computer vision related tasks). The beauty of their design means that as the deep network gets better over time, it also informs MCTS and makes the search process more efficient. The self-reinforcing cycle quickly snowballs and makes for an extremely powerfull system.
+  With this knowledge, DeepMind innovated to create a line of "deepified" MCTS agents. For AlphaZero, DeepMind uses a 40-layer, two-headed convolutional ResNet to map an input board state to both a value scalar output and a policy vector output.
+  The value scalar output (v) is a tanh activation indicating how likely the given board state is to result in a win (1), loss (-1), or tie (0).
+  The policy vector softmax output (P) is a prior distribution over valid actions from the given board state.
+  
+  <table align="center">
+      <tr><td><img src="images/nnetapi.png" width=500 style="margin-right:40px"/></td></tr>
+    </table>
+  
+  <p>
+  Using the outputs from this network, "deepifying" MCTS takes just two changes.
 </p>
+  <ol>
+    <li>
+      <p>
+  The UCT heuristic is updated to include P<sub>i</sub>, the prior probability of taking action i.
+  This change makes our heuristic more efficient because it prevents actions with really bad prior probabilities from being over-explored.
+</p>
+  <table align="center">
+    <tr><td><img src="images/augmented.png" width=250 style="margin-right:40px"/></td></tr>
+  </table>
+</li>
+<li>
+  <p>
+  Random playouts during the MCTS Simulation step are removed.
+  Instead, we treat our network's value scalar output v as the approximated value of a roll-out.
+  Using a deep network to infer state value helps us remember value between episodes of MCTS and generalizes to new states we might encounter during competitive play.
+  The value scalar v gets Backpropagated up the tree, and is thereby integrated into the W term of our heuristic.
+</p>
+</li>
+</ol>
+
+<p>
+  Now that a deep network has been integrated into the heuristic, we need to train it.
+  To do this, we use MCTS as a powerful policy improvement operator.
+  Initially, our network weights are all random, thus starting with a random policy.
+</p>
+
+<p>
+  Training proceeds as follows.
+  We start at the initial board state of our game (s<sub>1</sub>).
+  From here, run several iterations of MCTS to discover a probability distribution (π<sub>1</sub>) across valid actions.
+  Now we take our turn by sampling from π<sub>1</sub> to get to s<sub>2</sub>, and repeat the process until we eventually encounter a terminal state.
+  This terminal state outcome z will be 1 for win, -1 for loss, or 0 for tie.
+  After we have finished the game, we can generate a training sample for each turn (s<sub>i</sub>, π<sub>i</sub>, z).
+  After several games, we can use our collection of training samples to update our network parameters by minimizing the following loss function, which is just a sum of cross-entropy loss and mean squared error.
+</p>
+
+
+
+<p>
+  The beauty of this design means that as the deep network gets better over time, it also informs MCTS and makes the search process more efficient. The self-reinforcing cycle quickly snowballs and makes for an extremely powerful system.
+</p>
+
 
 <br><br>
 <div style="text-align: center;">
@@ -360,7 +411,9 @@ One or two sentences on the main result you obtained. -->
 <h2>Approach</h2>
 <h4>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</h4>
 <p> 
-  We implemented AlphaZero from scratch and used it train an agent to master Tic-Tac-Toe and Connect-4. Our implementation was programmed in Python, Numpy, and Pytorch. We believed that we would succeed because both games have a relatively small branching factors and few game states compared to a game like Go. We directly compare the performance of the algorithm across three different network architectures (including a SENet, which, from our survey of literature, has not been tried before).
+  We implemented AlphaZero from scratch and used it train an agent to master Tic-Tac-Toe and Connect-4.
+  Our project was implemented as described in the AlphaZero background section, and was programmed using Python, Numpy, and Pytorch. 
+  We believed that we would succeed because both games have a relatively small branching factors and few game states compared to a game like Go. We directly compare the performance of the algorithm across three different network architectures (including a SENet, which, from our survey of literature, has not been tried before).
 </p>
 
 <h4>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</h4>
