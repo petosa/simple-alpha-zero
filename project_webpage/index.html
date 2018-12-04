@@ -36,6 +36,8 @@ color: #FF9900;
 <span style="font-size: 18px; line-height: 1.5em;">Georgia Institute of Technology</span>
 <hr>
 
+<a target="_blank" href="https://github.gatech.edu/npetosa3/alphazero"><h3>Link to Github Repo</h3></a>
+
 <!-- Goal -->
 <h2>Abstract</h2>
 <!-- 
@@ -50,8 +52,8 @@ One or two sentences on the main result you obtained. -->
 
 <p> 
   For our project, we implemented the AlphaZero algorithm completely from scratch and tested it on small games such as Tic-Tac-Toe and Connect-4. 
-  Additionally, we experimented using a state of the art Squeeze and Excitation Network (SENet) as part our architecture.
-  This is a novel angle, as SENets have not been integrated with AlphaZero according to existing literature.
+  Additionally, we experimented using a state of the art Squeeze-and-Excitation Network (SENet) as part our architecture.
+  This is a novel angle, as SENets have not been integrated with AlphaZero in any existing literature.
 </p>
 
 <p> 
@@ -75,7 +77,7 @@ One or two sentences on the main result you obtained. -->
 <h4>What did you try to do? What problem did you try to solve? Articulate your objectives using absolutely no jargon.</h4>
 <p>
   Our goal was to independently re-create an implementation of AlphaZero and test it on games like Tic-Tac-Toe and Connect-4.
-  We also wanted to evaluate performance across different network architectures, including the novel Squeeze and Excitation Network (SENet).
+  We also wanted to evaluate performance across different network architectures, including the novel Squeeze-and-Excitation Network (SENet).
 </p>
 
 <p>
@@ -93,8 +95,8 @@ One or two sentences on the main result you obtained. -->
 <p>
   The AlphaZero algorithm is straightforward, but nobody has yet been able to replicate the results that DeepMind achieved on Chess or Go because of the sheer computational power required.
   This is also our main limitation - we will not be able to exactly replicate DeepMind's results because we do not have Tensor Process Units (TPUs) at our disposal.
-  There are notable community-driven efforts to pool computation for the purposes of independently replicating DeepMind's performance with Go and Chess, namely Leela Zero and Leela Chess Zero, respectively.
-  There are also several groups that have successfully leveraged AlphaZero to learn easier games like Othello.
+  There are notable community-driven efforts to pool computation for the purposes of independently replicating DeepMind's performance with Go and Chess, namely <a target="_blank" href="https://github.com/gcp/leela-zero">Leela Zero</a> and <a target="_blank" href="https://github.com/LeelaChessZero/lczero">Leela Chess Zero</a>, respectively.
+  There are also several groups that have successfully leveraged AlphaZero to learn easier games like <a target="_blank" href="https://github.com/suragnair/alpha-zero-general">Othello</a>.
   Of the available open source AlphaZero implementations, most are intricate, poorly documented, untested, or designed specifically for use with one game.
 </p>
 
@@ -119,12 +121,12 @@ One or two sentences on the main result you obtained. -->
   </p>
   <p>
     Additionally, we can contribute the first documented results of an SENet being used within AlphaZero.
-    We hope that our results with SENet will be exciting and encourage other researchers to integrate squeeze-and-excitation into a new generation of AlphaZero agents.
+    We hope that our results with SENet will be exciting and encourage other researchers to integrate Squeeze-and-Excitation into a new generation of AlphaZero agents.
   </p>
 
 <br>
 <h2> Background </h2>
-<h4> Monte Carlo Tree Search (MCTS) </h4>
+<h3> Monte Carlo Tree Search (MCTS) </h3>
 <p> 
   At the heart of the AlphaZero algorithm is Monte Carlo Tree Search (MCTS) - a tree searching methodology used to determine the best move to make from the given board state. To understand how AlphaZero innovates on MCTS, it is important to first understand how vanilla MCTS works. 
 </p>
@@ -186,7 +188,7 @@ One or two sentences on the main result you obtained. -->
     </p>
 
     <p> 
-      When MCTS is run on a new game, there will only be one node its search tree to begin with.
+      When MCTS is run on a new game, there will only be one node in its search tree to begin with.
       This node is the game's starting state s<sub>init</sub>, and because it is the only node (and hence leaf) in the search tree so far, it trivially gets Selected. For a game like Tic-Tac-Toe this initial state would be an empty 3 by 3 board.
     </p>
 
@@ -221,7 +223,7 @@ One or two sentences on the main result you obtained. -->
     </p>
 
     <p> 
-      In the case of Tic-Tac-Toe, we would expand our selected node, s<sub>init</sub>. Since there are 9 possible actions that can be taken from this state (9 positions that player X can make a move), and s<sub>init</sub> is not a terminal state, we add all 9 states to s<sub>init</sub>, as shown below. 
+      In the case of Tic-Tac-Toe, we would expand our selected node, s<sub>init</sub>. Since there are 9 possible actions that can be taken from this state (9 positions that player X can make a move), and s<sub>init</sub> is not a terminal state, we connect all 9 children to s<sub>init</sub>, as shown below. 
       The N and W statistics are shown along each edge, as well as the UCT heuristic (H) which is computed from N and W.
     </p>
 
@@ -291,54 +293,17 @@ One or two sentences on the main result you obtained. -->
   We move on to the next game state, which becomes our root node, and repeat MCTS all over again to find our next best move. 
 </p>
 
-<h4> The Squeeze and Excitation Network (SENet) </h4>
-
-<p> 
-  Our implementation of AlphaZero is highly modular. The modularity made it much easier to test different games and novel networks to train. One of the networks we plugged into our system was the Squeeze and Excitation Network (SENet). The introduction of SENets created waves when they were used in the ImageNet competition of 2017, improving the results from the previous year by a staggering 25%. 
-</p>
-
-<p> 
-  The main crux of the SENet is that it introduces parameters into each channel of a convolutional block, so that the network can adaptively adjust the weight of each feature map (a process known as feature recalibration).
-</p>
-
-<p> 
-  In general, convolutional neural networks efficiently extract hierarchical information from their filters - in class we have seen that layers closer to the start of the network tend to find low-level features such as edges, while layers towards the end of the network, closer to the loss layer, are attuned to detecting faces or more complex scenes. The spatial and channel information are used in conjunction, and the network equally weights these channels when output maps are being created. 
-</p>
-
-<p> 
-  With the SENet, the aim is to weight each channel adaptively, so that it is more aware of the content in each channel. It wants to explicitly model channel interdependencies between its convolutional features. A simple example would be adding one parameter to each channel and linearly scaling it based on how relevant each channel is. 
-</p>
-
-<p> 
-  In reality, the process is a little more complicated. A holistic understanding of each channel is garnered by squeezing the feature maps into a single value (by Average Pooling). Squeezing gives rise to a vector whose size is equal to the number of original convolutional channels. This vector is passed through a two-layer neural network and a sigmoid, creating a vector of the same size. The contents of this output vector are used as the weights of the original feature maps (they are now scaled based on relevance).
-</p>
-
-<p>
-  The diagram below shows how a ResNet module would be updated with the concepts from the SENet (adding the fully connected layers and the sigmoid layer).
-</p>
-
-<br><br>
-<div style="text-align: center;">
-<!-- http://image-net.org/challenges/talks_2017/SENet.pdf -->
-<img style="height: 350px;" alt="" src="images/senet1.png">
-</div>
 <br><br>
 
-<p> 
-  A complete SENet is then created by stacking multiple of these layers (now called an SE Block, since it augments convolutional blocks) on top of each other.
-</p>
+<h3> AlphaZero </h3>
 
-<p>
-  A succent overview of the SENet, by the authors, is shown below.
-</p>
+<table>
+<tr>
+  <td style="padding:0 15px 0 15px;"><a target="_blank" href="https://github.gatech.edu/npetosa3/alphazero/blob/master/mcts.py"><h4>mcts.py</h4> </a></td>
+  <td style="padding:0 15px 0 15px;"><a target="_blank" href="https://github.gatech.edu/npetosa3/alphazero/blob/master/train.py"><h4>train.py</h4> </a></td>
+</tr>
+</table>
 
-<br><br>
-<div style="text-align: center;">
-<img style="height: 280px;" alt="" src="images/senet2.png">
-</div>
-<br><br>
-
-<h4> AlphaZero </h4>
 <p> 
   Vanilla MCTS performs quite well. One of its earliest successes was in Crazy Stone, a Go agent that defeated a professional Go player in 2008, with a small handicap. These results showed that MCTS was a promising direction that could be further pursued.
 </p>
@@ -369,7 +334,7 @@ One or two sentences on the main result you obtained. -->
   <p>
   Random playouts during the MCTS Simulation step are removed.
   Instead, we treat our network's value scalar output v as the approximated value of a roll-out.
-  Using a deep network to infer state value helps us remember value between episodes of MCTS and generalizes to new states we might encounter during competitive play.
+  Using a deep network to infer state is more accurate than a single random roll-out and generalizes to new states we might encounter during competitive play.
   The value scalar v gets Backpropagated up the tree, and is thereby integrated into the W term of our heuristic.
 </p>
 </li>
@@ -391,12 +356,13 @@ One or two sentences on the main result you obtained. -->
   After several games, we can use our collection of training samples to update our network parameters by minimizing the following loss function, which is just a sum of cross-entropy loss and mean squared error.
 </p>
 
-
+<table align="center">
+    <tr><td><img src="images/loss.png" width=250 style="margin-right:40px"/></td></tr>
+  </table>
 
 <p>
   The beauty of this design means that as the deep network gets better over time, it also informs MCTS and makes the search process more efficient. The self-reinforcing cycle quickly snowballs and makes for an extremely powerful system.
 </p>
-
 
 <br><br>
 <div style="text-align: center;">
@@ -405,13 +371,71 @@ One or two sentences on the main result you obtained. -->
 </div>
 <br><br>
 
+<h3> The Squeeze-and-Excitation Network (SENet) </h3>
+
+<table>
+    <tr>
+      <td style="padding:0 15px 0 15px;"><a target="_blank" href="https://github.gatech.edu/npetosa3/alphazero/blob/master/models/senet.py"><h4>senet.py</h4> </a></td>
+    </tr>
+    </table>
+
+
+<p> 
+  Our implementation of AlphaZero is highly modular. The modularity made it much easier to test different games and novel networks to train. One of the networks we plugged into our system was the Squeeze-and-Excitation Network (SENet). The introduction of SENets created waves when they were used in the ImageNet competition of 2017, improving the results from the previous year by a staggering 25%. 
+</p>
+
+<p> 
+  The main crux of the SENet is that it introduces parameters into each channel of a convolutional block, so that the network can adaptively adjust the weight of each feature map (a process known as feature recalibration).
+</p>
+
+<p> 
+  In general, convolutional neural networks efficiently extract hierarchical information from their filters - in class we have seen that layers closer to the start of the network tend to find low-level features such as edges, while layers towards the end of the network, closer to the loss layer, are attuned to detecting faces or more complex scenes. The spatial and channel information are used in conjunction, and the network equally weights these channels when output maps are being created. 
+</p>
+
+<p> 
+  With the SENet, the aim is to weight each channel adaptively, so that it is more aware of the content in each channel. It wants to explicitly model channel interdependencies between its convolutional features. You can imagine how this might be useful for modeling relationships between the channels of a board state. A simple example would be adding one parameter to each channel and linearly scaling it based on how relevant each channel is. 
+</p>
+
+<p> 
+  In reality, the process is a little more complicated. A holistic understanding of each channel is garnered by squeezing the feature maps into a single value (by Average Pooling). Squeezing gives rise to a vector whose size is equal to the number of original convolutional channels. This vector is passed through a two-layer neural network and a sigmoid, creating a vector of the same size. The contents of this output vector are used as the weights of the original feature maps (they are now scaled based on relevance).
+</p>
+
+<p>
+  The diagram below shows how a ResNet module would be updated with the concepts from the SENet (adding the fully connected layers and the sigmoid layer).
+</p>
+
+<br><br>
+<div style="text-align: center;">
+<!-- http://image-net.org/challenges/talks_2017/SENet.pdf -->
+<img style="height: 350px;" alt="" src="images/senet1.png">
+</div>
+<br><br>
+
+<p> 
+  A complete SENet is then created by stacking multiple of these layers (now called an SE Block, since it augments convolutional blocks) on top of each other.
+</p>
+
+<p>
+  A succinct overview of the SENet, by the authors, is shown below.
+</p>
+
+<br><br>
+<div style="text-align: center;">
+<img style="height: 280px;" alt="" src="images/senet2.png">
+</div>
+<br><br>
+
+
+
+
+
 <br>
 <h2>Approach</h2>
 <h4>What did you do exactly? How did you solve the problem? Why did you think it would be successful? Is anything new in your approach?</h4>
 <p> 
   We implemented AlphaZero from scratch and used it train an agent to master Tic-Tac-Toe and Connect-4.
-  Our project was implemented as described in the AlphaZero background section, and was programmed using Python, Numpy, and Pytorch. 
-  We believed that we would succeed because both games have a relatively small branching factors and few game states compared to a game like Go. We directly compare the performance of the algorithm across three different network architectures (including a SENet, which, from our survey of literature, has not been tried before).
+  Our algorithm was implemented as described in the AlphaZero background section, and was programmed using Python, Numpy, and Pytorch. 
+  We believed that we would succeed because both games have a relatively small branching factor and few game states compared to a game like Go. We directly compare the performance of the algorithm across three different network architectures (including an SENet, which, from our survey of literature, has not been tried before).
 </p>
 
 <h4>What problems did you anticipate? What problems did you encounter? Did the very first thing you tried work?</h4>
@@ -421,7 +445,7 @@ One or two sentences on the main result you obtained. -->
   It would take approximately 22 years to replicate DeepMind's Go program on our hardware!
   It was important to limit the scope of this project to something feasible with our hardware by picking a simpler game.
   Training a Tic-Tac-Toe agent was our immediate goal, and training a Connect-4 agent was our reach goal.
-  Go has has an average branching factor 250 and about 2*10<sup>170</sup> game states.
+  Go has an average branching factor of 250 and about 2*10<sup>170</sup> game states.
   Compare that to the simplicity of the other games:
   Tic-Tac-Toe has a maximum branching factor of 9 and about 5000 game states, and Connect-4 has a maximum branching factor of 6 and about 4.5 trillion game states. 
 </p>
@@ -431,14 +455,15 @@ One or two sentences on the main result you obtained. -->
   There are many intricate components like MCTS that are bug-prone.
   If any component was bugged, the entire AlphaZero pipeline would fail.
   To couteract this, we wrote extensive unit tests for each component during development.
-  In total, we created 31 tests for our implementation.
+  In total, we created   <a target="_blank" href="https://github.gatech.edu/npetosa3/alphazero/blob/master/tests/">31 tests </a>
+   for our implementation.
 </p>
 
 <p> 
   An unanticipated problem that we encountered was AlphaZero's sensitivity to certain hyperparameters.
 
   AlphaZero works by generating games of self-play as training data, and then updating its network based off that experience.
-  One tricky hyperparameter we had to tune was the number of self-play examples generated per network between gradient descent updates.
+  One tricky hyperparameter we had to tune was the number of self-play games executed per network between gradient descent updates.
   The AlphaZero paper offered no guidance on this value, so we initially started it at 1 - that is, 1 game generated per network followed by an update.
   We found that at this frequency learning was unstable - policies would change drastically between subsequent networks, impairing learning.
   After some experimenting, we found that generating at least 30 training data games per iteration enabled stable learning.
@@ -451,22 +476,46 @@ One or two sentences on the main result you obtained. -->
   Experimenting with different hyperparameters is expensive because AlphaZero takes a long time to train, so once we discovered a set of hyperparameters that yielded good performance across many games and networks we stopped tweaking.
 </p>
 
+Algorithm Hyperparameters
 <br>
-Algorithm Parameters
-<ul>
-  <li>Number of self-play games generated per network: 30</li>
-  <li>Number of batches per update: 1000</li>
-  <li>MCTS iterations per move: 50 (Set as 800 in AlphaZero paper)</li>
-  <li>cpuct (value of free parameter c, in UCT heuristic): 3</li>
-</ul>
+<table align="left" border="1">
+  <tr>
+    <th>Hyperparameter</th> <th>Our value</th>  <th>DeepMind value</th>
+  </tr>
+<tr>
+    <td>Number of self-play games generated per network</td> <td>30</td> <td>Unspecified</td>
+</tr>
+<tr>
+    <td>Batch Size</td> <td>64</td> <td>2048</td>
+</tr>
+<tr>
+    <td>Number of batches per update</td> <td>1000</td> <td>Unspecified</td>
+</tr>
+<tr>
+    <td>MCTS iterations per turn</td> <td>50</td> <td>800</td>
+</tr>
+<tr>
+    <td>c (Heuristic exploration parameter)</td> <td>3</td> <td>Unspecified</td>
+</tr>
+</table>
+<br><br><br><br><br><br><br>
+Network Hyperparameters
 <br>
-Network Parameters
-<ul>
-  <li>Optimizer: Adam (SGD+Momentum in AlphaZero paper)</li>
-  <li>Learning rate: 1e-3 (1e-2 -> 1e-4 decay in AlphaZero paper)</li>
-  <li>Batch size: 64 (2048 in AlphaZero paper)</li>
-  <li>L2 regularization: 1e-4 (Same as AlphaZero paper)</li>
-</ul>
+<table align="left" border="1">
+  <tr>
+    <th>Hyperparameter</th> <th>Our value</th> <th>DeepMind value</th>
+  </tr>
+<tr>
+    <td>Optimizer</td> <td>Adam</td> <td>SGD+Momentum</td>
+</tr>
+<tr>
+    <td>Learning Rate</td> <td>1e-3</td> <td>1e-2 -> 1e-4</td>
+</tr>
+<tr>
+    <td>L2 Regularization</td> <td>1e-4</td> <td>1e-4</td>
+</tr>
+</table>
+<br><br><br><br><br><br>
 
 <p>
   To avoid overfitting, L2 regularization is set to 1e-4 as suggested in the AlphaZero paper.
@@ -493,10 +542,11 @@ Network Parameters
       <td>Mini/Small VGG</td> <td>Two-layer convolutional network with 2x2 or 4x4 filters.</td> <td>~40,000</td>
   </tr>
   <tr>
-      <td>SENet</td> <td>A deeper (4-layer) squeeze-and-excitation convolutional network.</td> <td>11,260,354</td>
+      <td>SENet</td> <td>A deeper (4-layer) Squeeze-and-Excitation convolutional network.</td> <td>11,260,354</td>
   </tr>
 </table>
 <p>
+  Each of these networks has a value head and policy head as described in the AlphaZero background section.
   These models are quite anemic compared to the 40-layer ResNet used by DeepMind, but our hope was that simpler games could be learned with simpler models.
 </p>
 <br>
@@ -507,6 +557,17 @@ Network Parameters
   If a player gets three of their symbols in a row, they win.
   Tic-Tac-Toe is a solved game - optimal play from both players will result in a tie.
 </p>
+<h5>State Representation</h5>
+
+<p>
+    Each board state as passed to the network is represented by a 3x3x3 tensor made up of 1's and 0's.
+    The first plane contains a 1 at every location player 1 (X) has a piece.
+    The second plane contains a 1 at every location player 2 (O) has a piece.
+    The third plane is all 0's if it's player 1's turn, or all 1's if it's player 2's turn.
+</p>
+<center><img src="images/ttt_state.png" width=600></center>
+
+
 <h5> Training Error </h5>
 <p>
   One measure of success is how well the network learned from self-play data.
@@ -521,14 +582,14 @@ Network Parameters
   Regardless of architecture choice, with more and more iterations of training, train error decreases.
   This result on its own is exciting; deep RL techniques are notoriously unstable, yet looking at this graph we see stable learning.
   Network architecture has a noticeable impact on error - the two layer fully-connected MLP has higher error after the same number of iterations as the shallow CNN (MiniVGG) or deep CNN (SENet).
-  For a simple game like Tic-Tac-Toe, making our network deeper does not confer a significant advantage over using a shallower network.
+  For a simple game like Tic-Tac-Toe, making our network deeper does not confer a significant advantage over using a shallower network, but convolutions certainly did help.
 </p>
 <h5> Generalized Performance </h5>
 <p>
   So the convolutional networks have lower self-play training error, but we would like to know how well they generalize.
   To test the general strength of each network, we developed a novel benchmark: each agent plays against vanilla MCTS agents of increasing strength and records its win rate.
   Vanilla MCTS agents do not use a deep heuristic; they use the UCT heuristic discussed earlier.
-  After each turn, the number of MCTS iterations used by the opponent doubles, starting from 10 and ending at 20,480. This allows the agent to use much more time to explore possible moves (a few minutes) before taking a turn.
+  After each turn, the number of MCTS iterations used by the opponent doubles, starting from 10 and ending at 20,480. This allows the opponent to use much more time to explore possible moves (a few minutes) before taking a turn.
   In this way, we can compare the relative strengths of the networks against an identical opponent to get a better idea of how well their strategies generalize outside of self-play.
   The performance of these networks against increasingly stronger opponents is plotted below.
 </p>
@@ -571,7 +632,7 @@ Network Parameters
 <h5> Filter Visualization </h5>
 <p>
   Here are some visualizations of filters from the first convolutional layer of the Tic-Tac-Toe SENet.
-  Strong red colors at indicate responses to the first player's pieces,
+  Strong red colors indicate responses to the first player's pieces,
   and blue colors indicate responses to the second player's pieces.
   Purplish blends indicate responses to both.
   The semantic purpose of each filter is not obvious, but we do know
@@ -602,14 +663,30 @@ Network Parameters
 <table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
   <tr><th>Human</th> <th>Human Wins</th> <th>Ties</th> <th>Human Losses</th> <th>Human win rate</th> </tr>
   <tr><td>Maria</td> <td>0</td> <td>6</td> <td>4</td> <td>30%</td></tr>
+  <tr><td>Ethan</td> <td>0</td> <td>5</td> <td>1</td> <td>42%</td></tr>
+  <tr><td>Chaitya</td> <td>0</td> <td>4</td> <td>2</td> <td>33%</td></tr>
+  <tr><td>Will</td> <td>0</td> <td>3</td> <td>1</td> <td>38%</td></tr>
 </table>
+<p>
+The average human win rate against the AI is 36%, so the average AI win rate is 64%.
+Our AI is therefore stronger than a competent (non-expert) human.
+</p>
   
 <br>
 <h2>Experiments and Results: Connect-4</h2>
 <h5>About Connect-4</h5>
 <p>
-  From Wikipedia:
-  "Connect 4 is a two-player connection game in which the players first choose a color and then take turns dropping one colored disc from the top into a seven-column, six-row vertically suspended grid. The pieces fall straight down, occupying the lowest available space within the column. The objective of the game is to be the first to form a horizontal, vertical, or diagonal line of four of one's own discs. Connect Four is a solved game. The first player can always win by playing the right moves"
+  Connect-4 is a two-player game where players take turns dropping discs into a seven-column, six-row grid. The first player to get 4 of their discs in a row wins. Connect-4 is a solved game: the first player can force a win by playing the right moves.
+</p>
+
+<h5>State Representation</h5>
+
+<p>
+State representation is very similar to that of Tic-Tac-Toe.
+  Each board state as passed to the network is represented by a 6x7x3 tensor made up of 1's and 0's.
+  The first plane contains a 1 at every location player 1 has a piece.
+  The second plane contains a 1 at every location player 2 has a piece.
+  The third plane is all 0's if it's player 1's turn, or all 1's if it's player 2's turn.
 </p>
 
 <h5> Training Error </h5>
@@ -633,7 +710,7 @@ Network Parameters
 <h5> Generalized Performance </h5>
 <p>
   The SENet has the lowest self-play training error, but we would like to know how well it generalizes compared to the other networks.
-  We use the same methodology as with Tic-Tac-Toe to test how well the agent generalizes.
+  We use the same methodology as with Tic-Tac-Toe to test how well the agents generalizes.
   The performance of these networks against increasingly stronger opponents is plotted below.
 </p>
 
@@ -656,7 +733,7 @@ Network Parameters
   Contrary to what we saw with Tic-Tac-Toe, we do not appear to converge to an optimal solution.
   As mentioned earlier, Connect-4 is a solved game - the first player can force a win.
   If both AlphaZero and the benchmark were playing optimally, we would expected win rate to converge to 50% (win when playing first, lose when playing second, therefore winning half the games).
-  However, that is not what we are seeing. For each of the networks, our win rate hits 0% - if our agents were playing optimally, this would never happen.
+  However, that is not what we are seeing. For each of the networks, there is a match our win rate hits 0% - if our agents were playing optimally, this would never happen.
   Even though we did not converge on optimal play, we still learned a very strong heuristic. See the Human Competitor section for a demonstration.
 </p>
 
@@ -666,7 +743,7 @@ Network Parameters
 </p>
 
 <p>
-  Again, we plot a 50-iteration vanilla MCTS agent control agent in black for comparison. 
+  Again, we plot a 50-iteration vanilla MCTS control agent in black for comparison. 
   At each opponent, our networks meet or beat the win rate of the control.
   This shows that even though we failed to learn the optimal strategy, we still learned a heuristic that is strictly better than UCT.
   Even with our current heuristic, if we allow our MCTS to perform more than 50 iterations (800 was used for Go), we will likely converge on optimal play, though we would require more thinking time.
@@ -676,7 +753,7 @@ Network Parameters
 <h5> Filter Visualization </h5>
 <p>
   Here are some visualizations of filters from the first convolutional layer of the Connect 4 SENet.
-  As before, strong red colors at indicate responses to the first player's pieces, blue colors indicate responses to the second player's pieces, and purplish blends indicate responses to both.
+  As before, strong red colors indicate responses to the first player's pieces, blue colors indicate responses to the second player's pieces, and purplish blends indicate responses to both.
   Again, the semantic purpose of each filter is not immediately clear, but we do know they are definitely extracting board patterns that are significant to making decisions during game-play.
 </p>
 <table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
@@ -703,43 +780,74 @@ Network Parameters
 <table border="1" align="center" style="margin-top: 30px; margin-bottom: 30px;">
   <tr><th>Human</th> <th>Human Wins</th> <th>Ties</th> <th>Human Losses</th> <th>Human win rate</th> </tr>
   <tr><td>Maria</td> <td>1</td> <td>0</td> <td>5</td> <td>17%</td></tr>
+  <tr><td>Ethan</td> <td>1</td> <td>0</td> <td>7</td> <td>13%</td></tr>
+  <tr><td>Chaitya</td> <td>0</td> <td>0</td> <td>8</td> <td>0%</td></tr>
+  <tr><td>Will</td> <td>0</td> <td>0</td> <td>4</td> <td>0%</td></tr>
 </table>
 
+<p>
+    The average human win rate against the AI is 8%, so the average AI win rate is 92%.
+    Our AI is therefore much stronger than a competent (non-expert) human.
+</p>
+
+
 <br>
+
+<h2>Relation to Deep Learning</h2>
+<h4>What was the structure of your problem? How did the structure of your model reflect the structure of your problem?</h4>
+This is addressed in the AlphaZero background section. Our model has both a value and policy head because of the structure of our problem.
+<h4>What parts of your model had learned parameters (e.g., convolution layers) and what parts did not (e.g., post-processing classifier probabilities into decisions)?</h4>
+The entire model we defined is made of learnable parameters, except of course activation functions, softmax, and pooling layers. The MCTS is one part of our pipeline that does not have learnable parameters.
+<h4>What representations of input and output did the neural network expect? How was the data pre/post-processed?</h4>
+The input state representations are discussed in the Tic-Tac-Toe and Connect-4 results section. The value/policy outputs are discussed in the AlphaZero background section.
+<h4>What was the loss function?</h4>
+This is discussed in the AlphaZero background section.
+<h4>Did the model overfit? How well did the approach generalize?</h4>
+Generalization is discussed in the Generalized Performance and Human Competitor sections of the Experiments and Results sections.
+<h4>What hyperparameters did the model have? How were they chosen? How did they affect performance? What optimizer was used?</h4>
+Hyperparameters and optimizer is discussed in the Approach section.
+<h4>What Deep Learning framework did you use?</h4>
+Pytorch.
+<h4>What existing code or models did you start with and what did those starting points provide?</h4>
+Everything was built from scratch.
+
+<br><br><br>
+
 <h2> Bibliography </h2>
 
 <h5> AlphaZero Sources </h5>
   <ul>
-    <li> <a href "https://arxiv.org/pdf/1712.01815.pdf"> https://arxiv.org/pdf/1712.01815.pdf </a> </li>
-    <li> <a href "http://stanford.edu/~cpiech/cs221/apps/deepBlue.html"> http://stanford.edu/~cpiech/cs221/apps/deepBlue.html </a> </li>
+    <li> <a target="_blank" href="https://arxiv.org/pdf/1712.01815.pdf"> https://arxiv.org/pdf/1712.01815.pdf </a> </li>
+    <li> <a target="_blank" href="https://deepmind.com/documents/119/agz_unformatted_nature.pdf"> https://deepmind.com/documents/119/agz_unformatted_nature.pdf </a> </li>
+    <li> <a target="_blank" href="http://stanford.edu/~cpiech/cs221/apps/deepBlue.html"> http://stanford.edu/~cpiech/cs221/apps/deepBlue.html </a> </li>
+    <li> <a target="_blank" href="https://github.com/suragnair/alpha-zero-general/raw/master/pretrained_models/writeup.pdf">https://github.com/suragnair/alpha-zero-general/raw/master/pretrained_models/writeup.pdf</a> </li>
 
  </ul>
 
 <h5> MCTS Sources </h5>
   <ul>
-    <li> <a href "http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/"> http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ </a> </li>
+    <li> <a target="_blank" href="http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/"> http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/ </a> </li>
 
 
-    <li> <a href "https://en.wikipedia.org/wiki/Solved_game"> https://en.wikipedia.org/wiki/Solved_game </a> </li>
+    <li> <a target="_blank" href="https://en.wikipedia.org/wiki/Solved_game"> https://en.wikipedia.org/wiki/Solved_game </a> </li>
 
-    <li> <a href "https://en.wikipedia.org/wiki/Monte_Carlo_tree_search"> https://en.wikipedia.org/wiki/Monte_Carlo_tree_search </a> </li>
+    <li> <a target="_blank" href="https://en.wikipedia.org/wiki/Monte_Carlo_tree_search"> https://en.wikipedia.org/wiki/Monte_Carlo_tree_search </a> </li>
 
  </ul>
 
 <h5> SENet Sources </h5>
   <ul> 
-    <li> <a href "https://towardsdatascience.com/squeeze-and-excitation-networks-9ef5e71eacd7"> https://towardsdatascience.com/squeeze-and-excitation-networks-9ef5e71eacd7 </a> </li>
+    <li> <a target="_blank" href="https://towardsdatascience.com/squeeze-and-excitation-networks-9ef5e71eacd7"> https://towardsdatascience.com/squeeze-and-excitation-networks-9ef5e71eacd7 </a> </li>
 
-    <li> <a href "http://image-net.org/challenges/talks_2017/SENet.pdf"> http://image-net.org/challenges/talks_2017/SENet.pdf </a> </li>
+    <li> <a target="_blank"href="http://image-net.org/challenges/talks_2017/SENet.pdf"> http://image-net.org/challenges/talks_2017/SENet.pdf </a> </li>
 
-    <li> <a href "https://www.groundai.com/project/squeeze-and-excitation-networks/"> https://www.groundai.com/project/squeeze-and-excitation-networks/ </a> </li>
+    <li> <a target="_blank" href="https://www.groundai.com/project/squeeze-and-excitation-networks/"> https://www.groundai.com/project/squeeze-and-excitation-networks/ </a> </li>
   </ul>
 
 <hr>
   <footer> 
     <p>This webpage template is based on a similar one from Dr. Devi Parikh's
-    <a href="https://samyak-268.github.io/F18CS4476/">Intro to Computer Vision course</a>.</p>
-    <p> The MCTS diagrams were based on a <a href="http://tim.hibal.org/blog/alpha-zero-how-and-why-it-works/"> blog </a></p>
+    <a target="_blank"href="https://samyak-268.github.io/F18CS4476/">Intro to Computer Vision course</a>.</p>
     <p>© Nick Petosa, Robert Keezer, Nupur Chatterji </p>
   </footer>
 </div>
