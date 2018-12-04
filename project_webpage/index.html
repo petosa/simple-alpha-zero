@@ -333,8 +333,8 @@ One or two sentences on the main result you obtained. -->
 <li>
   <p>
   Random playouts during the MCTS Simulation step are removed.
-  Instead, we treat our network's value scalar output v as the approximated value of a roll-out.
-  Using a deep network to infer state is more accurate than a single random roll-out and generalizes to new states we might encounter during competitive play.
+  Instead, we treat our network's scalar output v for a leaf node as the approximated value of a roll-out.
+  Using a deep network to infer value is more accurate than a single random roll-out and generalizes to new states we might encounter during competitive play.
   The value scalar v gets Backpropagated up the tree, and is thereby integrated into the W term of our heuristic.
 </p>
 </li>
