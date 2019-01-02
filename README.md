@@ -1,5 +1,9 @@
 # What is this
 An independent implementation and of DeepMind's AlphaZero algorithm with novel multiplayer support.
+AlphaZero is a deep reinforcement learning algorithm which can learn to master a certain class of adversarial games through self-play. Games must be discrete, turn-based, 2-player, and have perfect information.
+Strategies are learned *tabula rasa* and, with enough time and computation, achieve super-human performance.
+The canonical AlphaZero algorithm is intended for 2-player games like Chess and Go.
+The alpha-zero-multiplayer project extends the functionality of DeepMind's AlphaZero to support multiplayer games as well. Some examples of discrete, multiplayer games with perfect information are Blokus, Quatrochess, and Battle Sheep.
 
 # Benefits
 
