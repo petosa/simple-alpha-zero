@@ -4,7 +4,7 @@ An independent implementation and of DeepMind's AlphaZero algorithm with novel m
 # Benefits
 
 ### Clean & Simple
-Clear and concise. A no-frills AlphaZero implementation powered by Python 3 and PyTorch.
+Clear and concise - a no-frills AlphaZero implementation powered by Python 3 and PyTorch.
 Extensively documented and easy to extend.
 
 ### Fully Tested
