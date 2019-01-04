@@ -1,6 +1,6 @@
 import torch
 
-# Interface for defining a pytorch model.
+# Interface for defining a PyTorch model.
 class Model(torch.nn.Module):
 
   def __init__(self, input_shape, output_shape):

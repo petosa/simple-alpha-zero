@@ -77,7 +77,7 @@ def effective_model_power(checkpoint, game, model_class, sims, cuda=False):
         # Play main game
         scores, outcomes = play_match(game, [my_player] + contenders, verbose=False, permute=True)
         score, outcome = scores[my_player], outcomes[my_player]
-        #if outcome == "Lose": lost = True
+        if outcome == "Lose": lost = True
         print("{} <{}>      Opponent strength: {}".format(outcome, round(score, 3), strength), end="")
 
         # Play control game
@@ -114,16 +114,16 @@ def plot_train_loss(game, model_classes, cudas):
 
 
 if __name__ == "__main__":
-    checkpoint = 775
+    checkpoint = 2
     game = Connect4()
-    model_class = MLP
+    model_class = SENet
     sims = 50
-    cuda = False
+    cuda = True
     
-    #rank_checkpoints(game, model_class, sims, cuda)
-    #one_vs_all(checkpoint, game, model_class, sims, cuda)
-    #effective_model_power(checkpoint, game, model_class, sims, cuda)
-    #plot_train_loss(game, [MLP, SmallVGG, SENet], [False, False, True])
+    rank_checkpoints(game, model_class, sims, cuda)
+    one_vs_all(checkpoint, game, model_class, sims, cuda)
+    effective_model_power(checkpoint, game, model_class, sims, cuda)
+    plot_train_loss(game, [SENet], [True])
 
 
     '''
@@ -151,6 +151,8 @@ if __name__ == "__main__":
     plt.show()
 
     '''
+
+    '''
     x = [10,20,40,80,160,320,640,1280,2560,5120,10240,20480]
     control = [1.0, .75, .25, 1.0, .25, 0, .25, 0, 0, 0, 0, 0]
     senet = [1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0,.75, .5, 0]
@@ -173,3 +175,4 @@ if __name__ == "__main__":
     ax.set_ylim(ymin=0)
     plt.title("Connect4 - AlphaZero vs Vanilla MCTS Opponents")
     plt.show()
+    '''

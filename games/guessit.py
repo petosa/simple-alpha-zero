@@ -31,7 +31,7 @@ class TwoPlayerGuessIt(Game):
         if s[1,1,1] == 1:
             return 1
     def take_action(self, s, a):
-        p = int(s[0,0,2])
+        p = self.get_player(s)
         s = s.copy()
         s[:,:,p] += a.astype(np.float32) # Next move
         s[:,:,2] = (s[:,:,2] + 1) % 2 # Toggle player

@@ -69,7 +69,7 @@ class Trainer:
 
         if verbose:
             print("SIMULATING " + str(self.num_games) + " games")
-            start = time.clock()
+            start = time.time()
         if self.num_threads > 1:
             jobs = [temperature]*self.num_games
             pool = ThreadPool(self.num_threads)
@@ -82,13 +82,13 @@ class Trainer:
                 new_data = self.self_play(temperature)
                 self.training_data = np.concatenate([self.training_data, new_data], axis=0)
         if verbose:
-            print("Simulating took " + str(int(time.clock()-start)) + " seconds")
+            print("Simulating took " + str(int(time.time()-start)) + " seconds")
 
 
         # self.training_data = self.training_data[-200000:,:]
         if verbose:
             print("TRAINING")
-            start = time.clock()
+            start = time.time()
         mean_loss = None
         count = 0
         for _ in range(self.num_updates):
@@ -102,7 +102,7 @@ class Trainer:
         self.error_log.append(mean_loss)
 
         if verbose:
-            print("Training took " + str(int(time.clock()-start)) + " seconds")
+            print("Training took " + str(int(time.time()-start)) + " seconds")
             print("Average train error:", mean_loss)
 
 

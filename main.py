@@ -50,7 +50,7 @@ connect4_config = {
 connect4_config_cuda = {
     "game": Connect4,
     "model": SENet,
-    "ckpt_frequency": 5,
+    "ckpt_frequency": 1,
     "num_updates": 1000,
     "num_games": 30,
     "weight_decay": 1e-4,
@@ -58,10 +58,10 @@ connect4_config_cuda = {
     "cpuct": 3,
     "num_simulations": 50,
     "batch_size": 64,
-    "num_threads": 1,
+    "num_threads": 3,
     "cuda": True,
     "verbose": True,
-    "resume": True,
+    "resume": False,
 }
 
 leapfrog_config = {

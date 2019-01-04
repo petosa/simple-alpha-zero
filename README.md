@@ -9,6 +9,7 @@ The canonical AlphaZero algorithm is intended for 2-player games like Chess and 
 ### Clean & Simple
 Clear and concise - a no-frills AlphaZero implementation written with Python 3 and PyTorch.
 Extensively commented and easy to extend.
+Support for CPU and GPU training, as well as pausing and resuming.
 
 ### Fully Tested
 A suite of comprehensive unit tests validate the correctness of each AlphaZero component.
