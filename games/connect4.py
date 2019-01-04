@@ -4,18 +4,21 @@ from scipy.signal import correlate2d
 sys.path.append("..")
 from game import Game
 
-
+# Implementation for Connect 4.
 class Connect4(Game):
 
+    # Returns a blank Connect 4 board.
+    # There are extra layers to represent the red and yellow pieces, as well as a turn indicator layer.
     def get_initial_state(self):
         return np.zeros((6, 7, 2 + 1), dtype=np.float32) # Final plane is a turn indicator
 
+    # Returns a 7-item boolean array indicating open slots. 
     def get_available_actions(self, s):
         pieces = s[:, :, :2].sum(axis=-1)
         counts = pieces.sum(axis=0)
         return counts != 6
         
-    # Step from state s with action a
+    # Drop a red or yellow piece in a slot.
     def take_action(self, s, a):
         p = self.get_player(s)
         s = s.copy()
@@ -26,7 +29,7 @@ class Connect4(Game):
         s[:,:,2] = (s[:,:,2] + 1) % 2 # Toggle player
         return s
 
-    # Check the board for a winner (0/1), draw (-1), or incomplete (None)
+    # Check all possible 4-in-a-rows for a win.
     def check_winner(self, s):
         if self.get_available_actions(s).sum() == 0: # Full board, draw
             return -1
@@ -38,9 +41,11 @@ class Connect4(Game):
             if np.isin(4, correlate2d(board, i, mode="valid")): return p # Downward diagonol
             if np.isin(4, correlate2d(board, np.fliplr(i), mode="valid")): return p # Upward diagonol
 
+    # Return 0 for red's turn or 1 for yellow's turn.
     def get_player(self, s):
         return int(s[0,0,2])
 
+    # Fixed constant for Tic-Tac-Toe
     def get_num_players(self):
         return 2
 
