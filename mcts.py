@@ -42,7 +42,6 @@ class MCTS():
             w = self.game.check_winner(s)
             if w is not None: # Reached a terminal node
                 return 1 if w is not -1 else 0, w # Someone won, or tie
-            self.tree[hashed_s] = {} # Empty dictionary of children
             available_actions = self.game.get_available_actions(s)
             idx = np.stack(np.where(available_actions)).T
             p, v = self.nn.predict(s)

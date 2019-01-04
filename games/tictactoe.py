@@ -14,7 +14,7 @@ class TicTacToe(Game):
         
     # Step from state s with action a
     def take_action(self, s, a):
-        p = int(s[0,0,2])
+        p = self.get_player(s)
         s = s.copy()
         s[:,:,p] += a.astype(np.float32) # Next move
         s[:,:,2] = (s[:,:,2] + 1) % 2 # Toggle player
@@ -38,7 +38,7 @@ class TicTacToe(Game):
         return 2
 
     # Print a human-friendly visualization of the board.
-    def friendly_print(self, s):
+    def visualize(self, s):
         board = np.ones((3,3)).astype(np.object)
         board[:,:] = " "
         board[s[:,:,0] == 1] = 'x'

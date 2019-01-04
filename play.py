@@ -18,14 +18,14 @@ def play_match(game, players, verbose=False, permute=False):
     # Run the matches (there will be multiple if permute=True)
     for m in matches:
         s = game.get_initial_state()
-        if verbose: game.friendly_print(s)
+        if verbose: game.visualize(s)
         winner = game.check_winner(s)
         while winner is None:
             p_num = game.get_player(s)
             p = m[p_num]
             if verbose: print("Player {}'s turn.".format(p_num))
             s = p.update_state(s)
-            if verbose: game.friendly_print(s)
+            if verbose: game.visualize(s)
             winner = game.check_winner(s)
         for i, p in enumerate(m):
             if winner == -1:

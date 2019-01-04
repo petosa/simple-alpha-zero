@@ -41,7 +41,7 @@ class ThreePlayerLinearLeapFrog(Game):
         vec = s[0,0,1:]
         return int(np.where(vec==1)[0][0])
     def get_num_players(self): return 3
-    def friendly_print(self, s):
+    def visualize(self, s):
         path = s[:,0, 0]
         board = np.zeros_like(path, dtype=np.object)
         board[:] = "_"
@@ -88,7 +88,7 @@ class ThreePlayerLeapFrog(Game):
         vec = s[0,0,1:]
         return int(np.where(vec==1)[0][0])
     def get_num_players(self): return 3
-    def friendly_print(self, s):
+    def visualize(self, s):
         path = s[:,0, 0]
         board = np.zeros_like(path, dtype=np.object)
         board[:] = "_"

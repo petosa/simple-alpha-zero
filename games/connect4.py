@@ -45,7 +45,7 @@ class Connect4(Game):
         return 2
 
     # Print a human-friendly visualization of the board.
-    def friendly_print(self, s):
+    def visualize(self, s):
         board = np.ones((6,7)).astype(np.object)
         board[:,:] = "_"
         board[s[:,:,0] == 1] = 'x'

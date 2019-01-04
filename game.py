@@ -1,29 +1,41 @@
+# Interface for defining a new game.
 class Game:
 
+    # Returns an ndarray representing the initial game state.
+    # Note that array values should be between 0 and 1.
     def get_initial_state(self):
         raise NotImplementedError
 
+    # Returns a boolean ndarray of actions, where True indicates an available action
+    # and False indicates an unavailable action at the current state s.
+    # The shape of this action ndarray does not have to match the shape of the state.
     def get_available_actions(self, s):
         raise NotImplementedError
 
+    # Given the current state, evaluate if the game has ended.
+    # Convention:
     # Return None if there is no winner yet.
     # Return -1 if there is a tie.
     # Otherwise return the player number that won.
     def check_winner(self, s):
         raise NotImplementedError()
-        
-    # Taking an action. Make sure this does NOT modify the given s. Return a new array instead.
+    
+    # Given a state s and action a, produces a new ndarray s' which is the
+    # resulting state from taking action a in state s.
+    # Note that array values should be between 0 and 1.
+    # Make sure this does NOT modify s in-place; return a new ndarray instead.
     def take_action(self, s, a):
         raise NotImplementedError()
 
-    # Return the player number whose turn it is.
+    # Given the current state s, return an integer indicating which player's turn it is.
+    # The first player is 0, second player is 1, and so on.
     def get_player(self, s):
         raise NotImplementedError()
 
-    # The number of players for this game
+    # Return the number of players in this game.
     def get_num_players(self):
         raise NotImplementedError()
 
     # Visualizes the given state.
-    def friendly_print(self, s):
+    def visualize(self, s):
         raise NotImplementedError()

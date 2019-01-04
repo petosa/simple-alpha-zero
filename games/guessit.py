@@ -15,7 +15,7 @@ class OnePlayerGuessIt(Game):
     def take_action(self, s, a): return s + a.astype(np.float32)
     def get_player(self, s): return 0
     def get_num_players(self): return 1
-    def friendly_print(self, s):
+    def visualize(self, s):
         board = np.ones((2,2)).astype(np.object)
         board[:,:] = " "
         board[s == 1] = 'a'
@@ -38,7 +38,7 @@ class TwoPlayerGuessIt(Game):
         return s
     def get_player(self, s): return int(s[0,0,2])
     def get_num_players(self): return 2
-    def friendly_print(self, s):
+    def visualize(self, s):
         board = np.ones((2,2)).astype(np.object)
         board[:,:] = " "
         board[s[:,:,0] == 1] = 'a'
