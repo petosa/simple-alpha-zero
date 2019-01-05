@@ -1,4 +1,5 @@
 
+
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +15,17 @@ from players.deep_mcts_player import DeepMCTSPlayer
 from players.uninformed_mcts_player import UninformedMCTSPlayer
 from play import play_match
 
+
+# Evaluate the outcome of playing a checkpoint against an uninformed MCTS agent
+def evaluate_against_uninformed(checkpoint, game, model_class, my_sims, opponent_sims, cuda=False):
+    my_model = NeuralNetwork(game, model_class, cuda=cuda)
+    my_model.load(checkpoint)
+    num_opponents = game.get_num_players() - 1
+    uninformeds = [UninformedMCTSPlayer(game, opponent_sims) for _ in range(num_opponents)]
+    informed = DeepMCTSPlayer(game, my_model, my_sims)
+    scores, outcomes = play_match(game, [informed] + uninformeds, permute=True)
+    score, outcome = scores[informed], outcomes[informed]
+    print("Opponent strength: {}     My win rate: {} ({})".format(opponent_sims, round(score, 3), outcome))
 
 
 # Tracks the current best checkpoint across all checkpoints
@@ -96,7 +108,7 @@ def plot_train_loss(game, model_classes, cudas):
         nn = NeuralNetwork(game, model_class, cuda=cuda)
         ckpt = nn.list_checkpoints()[-1]
         _, error = nn.load(ckpt, load_supplementary_data=True)
-        window = 20
+        window = 1
         error = np.convolve(error, np.ones(window), mode="valid")/window
         min_len = len(error) if min_len is None else min(min_len, len(error))
         plt.plot(error, label=model_class.__name__)
@@ -114,16 +126,19 @@ def plot_train_loss(game, model_classes, cudas):
 
 
 if __name__ == "__main__":
-    checkpoint = 2
-    game = Connect4()
-    model_class = SENet
+    checkpoint = 13
+    game = TicTacToe()
+    model_class = MiniVGG
     sims = 50
-    cuda = True
+    cuda = False
     
+    print("*** Rank Checkpoints ***")
     rank_checkpoints(game, model_class, sims, cuda)
+    print("*** One vs All ***")
     one_vs_all(checkpoint, game, model_class, sims, cuda)
+    print("*** Effective Model Power ***")
     effective_model_power(checkpoint, game, model_class, sims, cuda)
-    plot_train_loss(game, [SENet], [True])
+    plot_train_loss(game, [model_class], [cuda])
 
 
     '''

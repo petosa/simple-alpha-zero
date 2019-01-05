@@ -9,12 +9,13 @@ from players.deep_mcts_player import DeepMCTSPlayer
 # Object that coordinates AlphaZero training.
 class Trainer:
 
-    def __init__(self, game, nn, num_simulations, num_games, num_updates, cpuct, num_threads):
+    def __init__(self, game, nn, num_simulations, num_games, num_updates, buffer_size_limit, cpuct, num_threads):
         self.game = game
         self.nn = nn
         self.num_simulations = num_simulations
-        self.num_updates = num_updates
         self.num_games = num_games
+        self.num_updates = num_updates
+        self.buffer_size_limit = buffer_size_limit
         self.training_data = np.zeros((0,3))
         self.cpuct = cpuct
         self.num_threads = num_threads
@@ -84,8 +85,10 @@ class Trainer:
         if verbose:
             print("Simulating took " + str(int(time.time()-start)) + " seconds")
 
+        # Prune oldest training samples if a buffer size limit is set.
+        if self.buffer_size_limit is not None:
+            self.training_data = self.training_data[-self.buffer_size_limit:,:]
 
-        # self.training_data = self.training_data[-200000:,:]
         if verbose:
             print("TRAINING")
             start = time.time()
@@ -104,13 +107,4 @@ class Trainer:
         if verbose:
             print("Training took " + str(int(time.time()-start)) + " seconds")
             print("Average train error:", mean_loss)
-
-
-    def evaluate_against_uninformed(self, uninformed_simulations):
-        num_opponents = self.game.get_num_players() - 1
-        uninformeds = [UninformedMCTSPlayer(self.game, uninformed_simulations) for _ in range(num_opponents)]
-        informed = DeepMCTSPlayer(self.game, self.nn, self.num_simulations)
-        scores, outcomes = play_match(self.game, [informed] + uninformeds, permute=True)
-        score, outcome = scores[informed], outcomes[informed]
-        print("Opponent strength: {}     My win rate: {} ({})".format(uninformed_simulations, round(score, 3), outcome))
 

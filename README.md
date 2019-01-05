@@ -26,3 +26,13 @@ Easily plug in your own games or neural networks by implementing the Game and Mo
 
 ### Novel Multiplayer Support
 The first of its kind; support for games with more than 2 players.
+
+
+# Tutorial
+
+## Training an agent
+You can start training your own AlphaZero agents very easily.
+
+`python main.py configs/my_run_configuration.json`
+
+You must run main.py with the location of a run configuration json file as the first argument.

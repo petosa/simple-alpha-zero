@@ -1,4 +1,5 @@
 # Interface for defining a new game.
+# See the games folder for examples.
 class Game:
 
     # Returns an ndarray representing the initial game state.

@@ -8,7 +8,7 @@ from games.tictactoe import TicTacToe
 from games.leapfrog import ThreePlayerLinearLeapFrog
 from models.dumbnet import DumbNet
 from models.priornet import PriorNet
-from train import Trainer
+from trainer import Trainer
 from neural_network import NeuralNetwork
 
 
@@ -19,7 +19,7 @@ class TrainTests(unittest.TestCase):
         gi = TwoPlayerGuessIt()
         nn = NeuralNetwork(gi, DumbNet)
 
-        t = Trainer(gi, nn, num_simulations=2, num_games=1, num_updates=0, cpuct=1, num_threads=1)
+        t = Trainer(gi, nn, num_simulations=2, num_games=1, num_updates=0, buffer_size_limit=None, cpuct=1, num_threads=1)
         data = t.self_play(temperature=0)
 
         np.testing.assert_equal(data[:,-1], np.array([-1, 1, -1, 1]))
@@ -41,7 +41,7 @@ class TrainTests(unittest.TestCase):
         ttt = TicTacToe()
         nn = NeuralNetwork(ttt, PriorNet)
 
-        t = Trainer(ttt, nn, num_simulations=2, num_games=1, num_updates=0, cpuct=1, num_threads=4)
+        t = Trainer(ttt, nn, num_simulations=2, num_games=1, num_updates=0, buffer_size_limit=None, cpuct=1, num_threads=4)
         data = t.self_play(temperature=0)
 
         np.testing.assert_equal(data[:,-1], np.array([1, -1, 1, -1, 1, -1, 1]))
@@ -73,7 +73,7 @@ class TrainTests(unittest.TestCase):
         llf = ThreePlayerLinearLeapFrog()
         nn = NeuralNetwork(llf, DumbNet)
 
-        t = Trainer(llf, nn, num_simulations=2, num_games=1, num_updates=0, cpuct=1, num_threads=1)
+        t = Trainer(llf, nn, num_simulations=2, num_games=1, num_updates=0, buffer_size_limit=None, cpuct=1, num_threads=1)
         data = t.self_play(temperature=0)
         np.testing.assert_equal(data[:,-1], np.array([-1, 1, -1, -1, 1]))
 
@@ -81,22 +81,24 @@ class TrainTests(unittest.TestCase):
     def test_policy_iteration(self):
         ttt = TicTacToe()
         nn = NeuralNetwork(ttt, PriorNet)
-
-        loops = 100
-        t = Trainer(ttt, nn, num_simulations=2, num_games=loops, num_updates=0, cpuct=1, num_threads=4)
+        t = Trainer(ttt, nn, num_simulations=2, num_games=100, num_updates=0, buffer_size_limit=None, cpuct=1, num_threads=4)
         t.policy_iteration()
         states = t.training_data[:,0]
         inits = 0
         for s in states:
             if (s.astype(np.float32) == ttt.get_initial_state()).all():
                 inits += 1
+        self.assertEqual(inits, 100)
 
-        self.assertEqual(inits, loops)
 
+    # This test verifies that the training data buffer is properly managed when a limit is set.
+    def test_buffer_size_limit_100(self):
+        ttt = TicTacToe()
+        nn = NeuralNetwork(ttt, PriorNet)
+        t = Trainer(ttt, nn, num_simulations=2, num_games=100, num_updates=0, buffer_size_limit=100, cpuct=1, num_threads=4)
+        t.policy_iteration()
+        self.assertEqual(len(t.training_data), 100)
 
    
-
-
-
 if __name__ == '__main__':
     unittest.main()
