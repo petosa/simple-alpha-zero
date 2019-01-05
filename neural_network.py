@@ -2,7 +2,7 @@ import torch
 import numpy as np
 import os
 
-# Layer that manages interfacing data with the underlying PyTorch model.
+# Object that manages interfacing data with the underlying PyTorch model, as well as checkpointing models.
 class NeuralNetwork():
 
     def __init__(self, game, model_class, lr=1e-3, weight_decay=1e-8, batch_size=64, cuda=False):

@@ -1,3 +1,5 @@
+import json
+import sys
 import numpy as np
 from models.mlp import MLP
 from models.minivgg import MiniVGG
@@ -13,82 +15,14 @@ from neural_network import NeuralNetwork
 from train import Trainer
 
 
-tictactoe_config = {
-    "game": TicTacToe,
-    "model": MiniVGG,
-    "ckpt_frequency": 1,
-    "num_updates": 1000,
-    "num_games": 30,
-    "weight_decay": 1e-4,
-    "lr": 1e-3,
-    "cpuct": 3,
-    "num_simulations": 50,
-    "batch_size": 64,
-    "num_threads": 4,
-    "cuda": False,
-    "verbose": True,
-    "resume": False,
-}
-
-connect4_config = {
-    "game": Connect4,
-    "model": SmallVGG,
-    "ckpt_frequency": 10,
-    "num_updates": 100,
-    "num_games": 30,
-    "weight_decay": 1e-4,
-    "lr": 1e-3,
-    "cpuct": 3,
-    "num_simulations": 50,
-    "batch_size": 64,
-    "num_threads": 2,
-    "cuda": False,
-    "verbose": False,
-    "resume": False,
-}
-
-connect4_config_cuda = {
-    "game": Connect4,
-    "model": SENet,
-    "ckpt_frequency": 1,
-    "num_updates": 1000,
-    "num_games": 30,
-    "weight_decay": 1e-4,
-    "lr": 1e-3,
-    "cpuct": 3,
-    "num_simulations": 50,
-    "batch_size": 64,
-    "num_threads": 3,
-    "cuda": True,
-    "verbose": True,
-    "resume": False,
-}
-
-leapfrog_config = {
-    "game": ThreePlayerLeapFrog,
-    "model": MLP,
-    "ckpt_frequency": 1,
-    "num_updates": 1000,
-    "num_games": 30,
-    "weight_decay": 1e-4,
-    "lr": 1e-3,
-    "cpuct": 3,
-    "num_simulations": 50,
-    "batch_size": 64,
-    "num_threads": 4,
-    "cuda": False,
-    "verbose": True,
-    "resume": False,
-}
-
-# Please select your config
-#################################
-config = connect4_config_cuda
-#################################
+# Load in a run configuration
+with open(sys.argv[1], "r") as f:
+    config = json.loads(f.read())
 
 # Instantiate
-game = config["game"]()
-nn = NeuralNetwork(game=game, model_class=config["model"], lr=config["lr"],
+game = globals()[config["game"]]()
+model_class = globals()[config["model"]]
+nn = NeuralNetwork(game=game, model_class=model_class, lr=config["lr"],
     weight_decay=config["weight_decay"], batch_size=config["batch_size"], cuda=config["cuda"])
 pi = Trainer(game=game, nn=nn, num_simulations=config["num_simulations"],
 num_games=config["num_games"], num_updates=config["num_updates"], cpuct=config["cpuct"],

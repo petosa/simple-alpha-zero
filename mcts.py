@@ -37,7 +37,7 @@ class MCTS():
             best_a_idx = np.argmax(heuristic)
             best_a = stats[best_a_idx, 0] # Pick best action to take
             template = np.zeros_like(self.game.get_available_actions(s)) # Submit action to get s'
-            template[tuple(best_a)] = 1
+            template[tuple(best_a)] = True
             s_prime = self.game.take_action(s, template)
             v, winning_player = self.simulate(s_prime) # Forward simulate with this action
             n, q = N[best_a_idx], Q[best_a_idx]

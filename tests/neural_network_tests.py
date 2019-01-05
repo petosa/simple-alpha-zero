@@ -50,7 +50,7 @@ class TrainTests(unittest.TestCase):
             nn.train(data)
         p, v = nn.predict(s1)
         np.testing.assert_allclose(p, np.array([.35, .25, .15, .25], dtype=np.float32), atol=0.01)
-        np.testing.assert_allclose(v, .4, atol=.02)
+        np.testing.assert_allclose(v, .4, atol=.03)
 
 
 
