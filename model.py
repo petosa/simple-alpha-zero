@@ -4,10 +4,11 @@ import torch
 # See the models folder for examples.
 class Model(torch.nn.Module):
 
-  def __init__(self, input_shape, output_shape):
+  def __init__(self, input_shape, p_shape, v_shape):
     super(Model, self).__init__()
     self.input_shape = input_shape
-    self.output_shape = output_shape
+    self.p_shape = p_shape
+    self.v_shape = v_shape
 
   # Simply define the forward pass.
   # Your input will be a batch of ndarrays representing board state.

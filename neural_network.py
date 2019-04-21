@@ -10,7 +10,8 @@ class NeuralNetwork():
         self.batch_size = batch_size
         input_shape = game.get_initial_state().shape
         p_shape = game.get_available_actions(game.get_initial_state()).shape
-        self.model = model_class(input_shape, p_shape)
+        v_shape = (game.get_num_players(),)
+        self.model = model_class(input_shape, p_shape, v_shape)
         self.cuda = cuda
         if self.cuda:
             self.model = self.model.to('cuda')
@@ -28,10 +29,7 @@ class NeuralNetwork():
         states = np.stack(batch[:,0])
         x = torch.from_numpy(states)
         p_pred, v_pred = self.model(x)
-        v_pred = v_pred.view(-1)
-        p_gt, v_gt = batch[:,1], torch.from_numpy(batch[:,2].astype(np.float32))
-        if self.cuda:
-            v_gt = v_gt.cuda()
+        p_gt, v_gt = batch[:,1], np.stack(batch[:,2])
         loss = self.loss(states, (p_pred, v_pred), (p_gt, v_gt))
         self.optimizer.zero_grad()
         loss.backward()
@@ -46,7 +44,7 @@ class NeuralNetwork():
         with torch.no_grad():
             input_s = torch.from_numpy(input_s)
             p_logits, v = self.model(input_s)
-            p, v = self.get_valid_dist(s, p_logits[0]).cpu().numpy().squeeze(), v.cpu().numpy().reshape(-1)[0] # EXP because log softmax
+            p, v = self.get_valid_dist(s, p_logits[0]).cpu().numpy().squeeze(), v.cpu().numpy().squeeze() # EXP because log softmax
         return p, v
 
 
@@ -55,7 +53,10 @@ class NeuralNetwork():
         batch_size = len(states)
         p_pred, v_pred = prediction
         p_gt, v_gt = target
-        v_loss = ((v_pred - v_gt)**2).sum()
+        v_gt = torch.from_numpy(v_gt.astype(np.float32))
+        if self.cuda:
+            v_gt = v_gt.cuda()
+        v_loss = ((v_pred - v_gt)**2).sum() # Mean squared error
         p_loss = 0
         for i in range(batch_size):
             gt = torch.from_numpy(p_gt[i].astype(np.float32))
@@ -64,7 +65,7 @@ class NeuralNetwork():
             s = states[i]
             logits = p_pred[i]
             pred = self.get_valid_dist(s, logits, log_softmax=True)
-            p_loss += -torch.sum(gt*pred)            
+            p_loss += -torch.sum(gt*pred)
         return p_loss + v_loss
 
 
@@ -120,5 +121,5 @@ class NeuralNetwork():
         path = "checkpoints/{}-{}/".format(self.game.__class__.__name__, network_name)
         if  not os.path.isdir(path):
             return []
-        return sorted([filename.split(".ckpt")[0] for filename in os.listdir(path) if filename.endswith(".ckpt")])
+        return sorted([int(filename.split(".ckpt")[0]) for filename in os.listdir(path) if filename.endswith(".ckpt")])
 

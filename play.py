@@ -1,51 +1,41 @@
 from itertools import permutations
+import numpy as np
 
 # Runs a match with the given game and list of players.
-# Returns a dictionary of points. It will map each player object to its score.
+# Returns an array of points. Player number is the index into this array.
 # For each match, a player gains a point if it wins, loses a point if it loses,
 # and gains no points if it ties.
 def play_match(game, players, verbose=False, permute=False):
 
     # You can use permutations to break the dependence on player order in measuring strength.
-    matches = list(permutations(players)) if permute else [players]
+    matches = list(permutations(np.arange(len(players)))) if permute else [np.arange(len(players))]
     
     # Initialize scoreboard
-    scores = {}
-    for p in players:
-        scores[p] = 0
-        p.reset() # Reset incoming players as a precaution.
+    scores = np.zeros(game.get_num_players())
 
     # Run the matches (there will be multiple if permute=True)
-    for m in matches:
+    for order in matches:
+
+        for p in players:
+            p.reset() # Clear player trees to make the next match fair
+
         s = game.get_initial_state()
         if verbose: game.visualize(s)
-        winner = game.check_winner(s)
-        while winner is None:
-            p_num = game.get_player(s)
-            p = m[p_num]
-            if verbose: print("Player {}'s turn.".format(p_num))
-            s = p.update_state(s)
+        game_over = game.check_game_over(s)
+
+        while game_over is None:
+            p = order[game.get_player(s)]
+            if verbose: print("Player #{}'s turn.".format(p))
+            s = players[p].update_state(s)
             if verbose: game.visualize(s)
-            winner = game.check_winner(s)
-        for i, p in enumerate(m):
-            if winner == -1:
-                scores[p] += .5/len(matches)
-            elif winner == i:
-                scores[p] += 1/len(matches)
-            p.reset() # Clear our tree to make the next match fair
+            game_over = game.check_game_over(s)
 
-    # Assign an outcome to each player (Win, Lose, or Tie)
-    outcomes = {}
-    num_players = game.get_num_players()
-    for p in scores:
-        if scores[p] < 1/num_players:
-            outcomes[p] = "Lose"
-        elif scores[p] == 1/num_players:
-            outcomes[p] = "Tie"
-        else:
-            outcomes[p] = "Win"
+        scores[list(order)] += game_over
+        if verbose: print("Δ" + str(game_over[list(order)]) + ", Current scoreboard: " + str(scores))
 
-    return scores, outcomes
+
+    if verbose: print("Final scores:", scores)
+    return scores
 
 
 
@@ -59,20 +49,21 @@ if __name__ == "__main__":
     from players.deep_mcts_player import DeepMCTSPlayer
     from games.connect4 import Connect4
     from games.tictactoe import TicTacToe
+    from games.tictacmo import TicTacMo
     from games.leapfrog import ThreePlayerLeapFrog
 
 
     # Change these variable 
-    game = Connect4()
-    ckpt = 775
-    nn = NeuralNetwork(game, SENet, cuda=True)
-    nn.load(ckpt)
+    game = TicTacMo()
+    #ckpt = 15
+    #nn = NeuralNetwork(game, SENet, cuda=True)
+    #nn.load(ckpt)
     
     # HumanPlayer(game),
     # UninformedMCTSPlayer(game, simulations=1000)
     # DeepMCTSPlayer(game, nn, simulations=50)
     
-    players = [HumanPlayer(game), DeepMCTSPlayer(game, nn, simulations=50)]
-    for _ in range(5):
-        print(play_match(game, players, verbose=True, permute=True))
+    players = [HumanPlayer(game), HumanPlayer(game),UninformedMCTSPlayer(game, simulations=3000)]
+    for _ in range(1):
+        play_match(game, players, verbose=True, permute=True)
     

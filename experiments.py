@@ -10,6 +10,7 @@ from models.senet import SENet
 from neural_network import NeuralNetwork
 from games.connect4 import Connect4
 from games.tictactoe import TicTacToe
+from games.tictacmo import TicTacMo
 from games.leapfrog import ThreePlayerLeapFrog
 from players.deep_mcts_player import DeepMCTSPlayer
 from players.uninformed_mcts_player import UninformedMCTSPlayer
@@ -23,9 +24,8 @@ def evaluate_against_uninformed(checkpoint, game, model_class, my_sims, opponent
     num_opponents = game.get_num_players() - 1
     uninformeds = [UninformedMCTSPlayer(game, opponent_sims) for _ in range(num_opponents)]
     informed = DeepMCTSPlayer(game, my_model, my_sims)
-    scores, outcomes = play_match(game, [informed] + uninformeds, permute=True)
-    score, outcome = scores[informed], outcomes[informed]
-    print("Opponent strength: {}     My win rate: {} ({})".format(opponent_sims, round(score, 3), outcome))
+    scores = play_match(game, [informed] + uninformeds, permute=True)
+    print("Opponent strength: {}     Scores: {}".format(opponent_sims, scores))
 
 
 # Tracks the current best checkpoint across all checkpoints
@@ -46,11 +46,10 @@ def rank_checkpoints(game, model_class, sims, cuda=False):
         winning_model.load(current_winner)
         winners = [DeepMCTSPlayer(game, winning_model, sims) for _ in range(num_opponents)]
         
-        scores, outcomes = play_match(game, [contending_player] + winners, verbose=False, permute=True)
-        score, outcome = scores[contending_player], outcomes[contending_player]
-        print("Current Champ: {}    Challenger: {}    Outcome: {} <{}>    "
-                .format(current_winner, contender, outcome, score), end= "")
-        if outcome == "Win":
+        scores = play_match(game, [contending_player] + winners, verbose=False, permute=True)
+        print("Current Champ: {}    Challenger: {}    <{}>    "
+                .format(current_winner, contender, scores), end= "")
+        if scores[0] >= scores.max():
             current_winner = contender
         print("New Champ: {}".format(current_winner))
 
@@ -67,9 +66,10 @@ def one_vs_all(checkpoint, game, model_class, sims, cuda=False):
         contending_model.load(contender)
         my_player = DeepMCTSPlayer(game, my_model, sims)
         contenders = [DeepMCTSPlayer(game, contending_model, sims) for _ in range(num_opponents)]
-        scores, outcomes = play_match(game, [my_player] + contenders, verbose=False, permute=True)
-        score, outcome = scores[my_player], outcomes[my_player]
-        print("Challenger:", contender, "Outcome:", outcome, score)
+        scores = play_match(game, [my_player] + contenders, verbose=False, permute=True)
+        print("Challenger:", contender, "Outcome:", scores, "My score:", scores[0])
+        if scores.max() != scores[0]:
+                print("UPSET!")
 
 
 # Finds the effective MCTS strength of a checkpoint
@@ -87,20 +87,19 @@ def effective_model_power(checkpoint, game, model_class, sims, cuda=False):
         contenders = [UninformedMCTSPlayer(game, strength) for _ in range(num_opponents)]
 
         # Play main game
-        scores, outcomes = play_match(game, [my_player] + contenders, verbose=False, permute=True)
-        score, outcome = scores[my_player], outcomes[my_player]
-        if outcome == "Lose": lost = True
-        print("{} <{}>      Opponent strength: {}".format(outcome, round(score, 3), strength), end="")
+        scores = play_match(game, [my_player] + contenders, verbose=False, permute=True)
+        if scores[0] != scores.max(): lost = True
+        print("{} <{}>      Opponent strength: {}".format(scores, round(scores[0]), strength), end="")
 
         # Play control game
         control_player = UninformedMCTSPlayer(game, sims)
-        scores, outcomes = play_match(game, [control_player] + contenders, verbose=False, permute=True)
-        score, outcome = scores[control_player], outcomes[control_player]
-        print("      (Control: {} <{}>)".format(outcome, round(score, 3)))
+        scores = play_match(game, [control_player] + contenders, verbose=False, permute=True)
+        print("      (Control: {} <{}>)".format(scores, round(scores[0], 3)))
 
         strength *= 2 # Opponent strength doubles every turn
 
 
+# Plot training error against checkpoints.
 def plot_train_loss(game, model_classes, cudas):
     fig, ax = plt.subplots()
     min_len = None
@@ -126,11 +125,11 @@ def plot_train_loss(game, model_classes, cudas):
 
 
 if __name__ == "__main__":
-    checkpoint = 13
-    game = TicTacToe()
-    model_class = MiniVGG
+    checkpoint = 102
+    game = TicTacMo()
+    model_class = SENet
     sims = 50
-    cuda = False
+    cuda = True
     
     print("*** Rank Checkpoints ***")
     rank_checkpoints(game, model_class, sims, cuda)
@@ -138,6 +137,7 @@ if __name__ == "__main__":
     one_vs_all(checkpoint, game, model_class, sims, cuda)
     print("*** Effective Model Power ***")
     effective_model_power(checkpoint, game, model_class, sims, cuda)
+    print("*** Train Loss Plot ***")
     plot_train_loss(game, [model_class], [cuda])
 
 

@@ -39,17 +39,17 @@ class MCTS():
             template = np.zeros_like(self.game.get_available_actions(s)) # Submit action to get s'
             template[tuple(best_a)] = True
             s_prime = self.game.take_action(s, template)
-            v, winning_player = self.simulate(s_prime) # Forward simulate with this action
+            scores = self.simulate(s_prime) # Forward simulate with this action
             n, q = N[best_a_idx], Q[best_a_idx]
-            adj_v = v if current_player == winning_player else -v
-            stats[best_a_idx, 2] = (n*q+adj_v)/(n + 1)
+            v = scores[current_player] # Index in to find our reward
+            stats[best_a_idx, 2] = (n*q+v)/(n + 1)
             stats[best_a_idx, 1] += 1
-            return v, winning_player
+            return scores
 
         else: # Expand
-            w = self.game.check_winner(s)
-            if w is not None: # Reached a terminal node
-                return 1 if w is not -1 else 0, w # Someone won, or tie
+            scores = self.game.check_game_over(s)
+            if scores is not None: # Reached a terminal node
+                return scores
             available_actions = self.game.get_available_actions(s)
             idx = np.stack(np.where(available_actions)).T
             p, v = self.nn.predict(s)
@@ -57,7 +57,7 @@ class MCTS():
             stats[:,-1] = p
             stats[:,0] = list(idx)
             self.tree[hashed_s] = stats
-            return v, current_player
+            return v
 
 
     # Returns the MCTS policy distribution for state s.

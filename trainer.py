@@ -28,8 +28,8 @@ class Trainer:
         tree = MCTS(self.game, self.nn)
 
         data = []
-        w = None
-        while w is None:
+        scores = self.game.check_game_over(s)
+        while scores is None:
             
             # Think
             for _ in range(self.num_simulations):
@@ -37,7 +37,7 @@ class Trainer:
 
             # Fetch action distribution and append training example template.
             dist = tree.get_distribution(s, temperature=temperature)
-            data.append([self.game.get_player(s), s, dist[:,1], None]) # player, state, prob, outcome
+            data.append([s, dist[:,1], None]) # state, prob, outcome
 
             # Sample an action
             idx = np.random.choice(len(dist), p=dist[:,1].astype(np.float))
@@ -49,18 +49,14 @@ class Trainer:
             template[a] = 1
             s = self.game.take_action(s, template)
 
-            # Check winner
-            w = self.game.check_winner(s)
+            # Check scores
+            scores = self.game.check_game_over(s)
 
         # Update training examples with outcome
-        data = np.array(data)
-        if w == -1:
-            data[:,-1] = 0
-        else:
-            data[data[:,0] == w, -1] = 1
-            data[data[:,0] != w, -1] = -1
+        for i, _ in enumerate(data):
+            data[i][-1] = scores
 
-        return data[:,1:]
+        return np.array(data)
 
 
     # Performs one iteration of policy improvement.

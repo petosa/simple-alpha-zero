@@ -33,7 +33,7 @@ class BasicBlock(nn.Module):
         # Squeeze
         w = F.avg_pool2d(out, out.size(2))
         w = F.relu(self.fc1(w))
-        w = F.sigmoid(self.fc2(w))
+        w = torch.sigmoid(self.fc2(w))
         # Excitation
         out = out * w  # New broadcasting feature from v0.2!
 
@@ -68,7 +68,7 @@ class PreActBlock(nn.Module):
         # Squeeze
         w = F.avg_pool2d(out, out.size(2))
         w = F.relu(self.fc1(w))
-        w = F.sigmoid(self.fc2(w))
+        w = torch.sigmoid(self.fc2(w))
         # Excitation
         out = out * w
 
@@ -77,23 +77,19 @@ class PreActBlock(nn.Module):
 
 
 class SENet(Model):
-    def __init__(self, input_shape, output_shape, block=PreActBlock, num_blocks=[2,2,2,2]):
-        super(SENet, self).__init__(input_shape, output_shape)
-
-        self.input_shape = input_shape
-        self.output_shape = output_shape
+    def __init__(self, input_shape, p_shape, v_shape, block=PreActBlock, num_blocks=[2,2,2,2]):
+        super(SENet, self).__init__(input_shape, p_shape, v_shape)
 
         self.in_planes = 64
-
-        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.conv1 = nn.Conv2d(input_shape[-1], 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.layer1 = self._make_layer(block,  64, num_blocks[0], stride=1)
         self.layer2 = self._make_layer(block, 128, num_blocks[1], stride=2)
         self.layer3 = self._make_layer(block, 256, num_blocks[2], stride=2)
         self.layer4 = self._make_layer(block, 512, num_blocks[3], stride=2)
 
-        self.p_head = torch.nn.Linear(512, np.prod(output_shape))
-        self.v_head = torch.nn.Linear(512, 1)
+        self.p_head = torch.nn.Linear(512, np.prod(p_shape))
+        self.v_head = torch.nn.Linear(512, np.prod(v_shape))
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
 
@@ -107,7 +103,8 @@ class SENet(Model):
 
     def forward(self, x):
         batch_size = len(x)
-        this_output_shape = tuple([batch_size] + list(self.output_shape))
+        this_p_shape = tuple([batch_size] + list(self.p_shape))
+        this_v_shape = tuple([batch_size] + list(self.v_shape))
         x = x.permute(0,3,1,2) # NHWC -> NCHW
 
         out = F.relu(self.bn1(self.conv1(x)))
@@ -118,8 +115,8 @@ class SENet(Model):
         out = self.avgpool(out)
         flat = out.view(out.size(0), -1)
         
-        p_logits = self.p_head(flat).view(this_output_shape)
-        v = torch.tanh(self.v_head(flat))
+        p_logits = self.p_head(flat).view(this_p_shape)
+        v = torch.tanh(self.v_head(flat).view(this_v_shape))
         
         return p_logits, v
 

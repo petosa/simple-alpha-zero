@@ -10,9 +10,10 @@ class DumbNet(Model):
 
   def forward(self, x):
     batch_size = len(x)
-    this_output_shape = tuple([batch_size] + list(self.output_shape))
+    this_p_shape = tuple([batch_size] + list(self.p_shape))
+    this_v_shape = tuple([batch_size] + list(self.v_shape))
 
-    p_logits = torch.ones(this_output_shape)
-    v = torch.zeros((batch_size, 1))
+    p_logits = torch.ones(this_p_shape)
+    v = torch.zeros(this_v_shape)
 
     return p_logits, v

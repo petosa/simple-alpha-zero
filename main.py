@@ -8,6 +8,7 @@ from models.bigvgg import BigVGG
 from models.resnet import ResNet
 from models.senet import SENet
 from games.tictactoe import TicTacToe
+from games.tictacmo import TicTacMo
 from games.leapfrog import ThreePlayerLeapFrog
 from games.connect4 import Connect4
 from games.guessit import TwoPlayerGuessIt

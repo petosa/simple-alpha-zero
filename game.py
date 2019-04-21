@@ -16,9 +16,8 @@ class Game:
     # Given the current state, evaluate if the game has ended.
     # Convention:
     # Return None if there is no winner yet.
-    # Return -1 if there is a tie.
-    # Otherwise return the player number that won.
-    def check_winner(self, s):
+    # Otherwise, return a numpy series of scores, where index corresponds to player number.
+    def check_game_over(self, s):
         raise NotImplementedError()
     
     # Given a state s and action a, produces a new ndarray s' which is the
