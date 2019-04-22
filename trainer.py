@@ -29,6 +29,9 @@ class Trainer:
 
         data = []
         scores = self.game.check_game_over(s)
+        root = True
+        alpha = 1
+        weight = .25
         while scores is None:
             
             # Think
@@ -37,6 +40,13 @@ class Trainer:
 
             # Fetch action distribution and append training example template.
             dist = tree.get_distribution(s, temperature=temperature)
+
+            # Add dirichlet noise to root
+            if root:
+                noise = np.random.dirichlet(np.array(alpha*np.ones_like(dist[:,1].astype(np.float32))))
+                dist[:,1] = dist[:,1]*(1-weight) + noise*weight
+                root = False
+
             data.append([s, dist[:,1], None]) # state, prob, outcome
 
             # Sample an action
